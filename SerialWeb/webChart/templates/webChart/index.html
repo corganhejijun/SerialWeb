@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- 引入 ECharts 文件 -->
+    <link rel="stylesheet" type="text/css" href="{% static 'webChart/bootstrap.min.css' %}" /> 
+    <script type="text/javascript" src="{% static 'webChart/jquery-2.2.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'webChart/bootstrap.min.js' %}"></script>
+    <script src="{% static 'webChart/echarts.min.js' %}"></script>
+    <style type="text/css">
+    div.top {
+        left: 30px;
+        right: 30px;
+        top: 10px;
+        height: 60px;
+        padding-left: 30px;
+        padding-top: 10px;
+    }
+    div.chart {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 60px;
+        width: 100%;
+    }
+    html, body{
+        height: 100%;
+        width: 100%;
+    }
+    </style>
+    <script type="text/javascript">
+    var now = +new Date(1997, 9, 3);
+    var value = Math.random() * 1000;
+    var oneDay = 24 * 3600 * 1000;
+    function randomData() {
+        now = new Date(+now + oneDay);
+        value = value + Math.random() * 21 - 10;
+        return {
+            name: now.toString(),
+            value: [
+                [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'),
+                Math.round(value)
+            ]
+        }
+    }
+
+    function setOption(){
+        var data = [];
+        for (var i = 0; i < 1000; i++) {
+            data.push(randomData());
+        }
+
+        option = {
+            title: {
+                text: '动态数据 + 时间坐标轴'
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                    params = params[0];
+                    var date = new Date(params.name);
+                    return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' : ' + params.value[1];
+                },
+                axisPointer: {
+                    animation: false
+                }
+            },
+            xAxis: {
+                type: 'time',
+                splitLine: {
+                    show: false
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '100%'],
+                splitLine: {
+                    show: false
+                }
+            },
+            series: [{
+                name: '模拟数据',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: data
+            }]
+        };
+
+        return {option: option, data: data};
+    }
+
+    function drawChart(dataList){
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+
+        // 指定图表的配置项和数据
+        var result = setOption();
+
+        setInterval(function () {
+            for (var i = 0; i < 5; i++) {
+                result.data.shift();
+                result.data.push(randomData());
+            }
+
+            myChart.setOption({
+                series: [{
+                    data: result.data
+                }]
+            });
+        }, 1000);
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(result.option);
+    }
+
+    function getMsg(button){
+        $.ajax({url: 'http://' + window.location.host + "/json",
+            data: {func: "read", name:button.value},
+            success: function(result){
+                if (result.flag == false){
+                    alert("读取失败");
+                    return;
+                }
+                alert(result.msg);
+            }
+        });
+    }
+
+    $(document).ready(function(){
+        var dataList = [];
+        for (var i = 0; i < $("button.com").length; i++){
+            dataList.push([]);
+        }
+        $("button").click(function(){
+            var button = $(this)[0]
+            if ($(button).hasClass('btn-success')){
+                $.ajax({url: 'http://' + window.location.host + "/json",
+                    data: {func: "open", name:button.value},
+                    success: function(result){
+                        if (result.flag == false){
+                            alert("打开失败");
+                            return;
+                        }
+                        button.innerHTML = "关闭" + button.value;
+                        $(button).removeClass('btn-success').addClass('btn-danger');
+                    }
+                });
+            }
+            else if ($(button).hasClass('btn-danger')){
+                $.ajax({url: 'http://' + window.location.host + "/json",
+                    data: {func:"close", name:button.value},
+                    success: function(result){
+                        if (result.flag == false){
+                            alert("关闭失败");
+                            return;
+                        }
+                        button.innerHTML = "打开" + button.value;
+                        $(button).removeClass('btn-danger').addClass('btn-success');
+                    }
+                });
+            }
+        });
+    });
+    </script>
+</head>
+<body>
+    <div class="top">
+        {% for item in list %}
+            {% for port, open in item.items %}
+                <button class="com btn {% if open %}btn-success{% else %}btn-danger{% endif %}" value="{{port}}">{% if open %}打开{% else %}关闭{% endif %}{{port}}</button>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div class="chart" id="main"></div>
+</body>
+</html>
