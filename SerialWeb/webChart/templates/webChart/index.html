@@ -3,6 +3,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <title>串口数据显示</title>
     <!-- 引入 ECharts 文件 -->
     <link rel="stylesheet" type="text/css" href="{% static 'webChart/bootstrap.min.css' %}" /> 
     <script type="text/javascript" src="{% static 'webChart/jquery-2.2.4.min.js' %}"></script>
@@ -43,45 +44,51 @@
         var data = [];
         for (var i = 0; i < dataList.length; i++){
             data.push({
-                name: dataList[i].name,
-                type: 'line',
-                showSymbol: false,
-                hoverAnimation: false,
                 data: dataList[i].data
             });
         }
         return data;
     }
 
-    function setOption(){
+    function setOption(dataList){
+        var color = ['#ff99ff', '#ff0000', '#0000cc', '#00ff99', '#cc9900', '#3366cc'];
+        var legend = [];
+        for (var i = 0; i < dataList.length; i++){
+            legend.push(dataList[i].name);
+        }
+        var data = [];
+        for (var i = 0; i < dataList.length; i++){
+            data.push({
+                name: dataList[i].name,
+                type: 'line',
+                showSymbol: false,
+            });
+        }
         option = {
+            color: color,
             title: {
-                text: '动态数据 + 时间坐标轴'
+                text: '串口数据图'
             },
             tooltip: {
                 trigger: 'axis',
-                formatter: function (params) {
-                    params = params[0];
-                    var date = new Date(params.name);
-                    return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' : ' + params.value[1];
-                },
                 axisPointer: {
-                    animation: false
+                    type: 'cross'
                 }
             },
             xAxis: {
                 type: 'time',
                 splitLine: {
                     show: false
-                }
+                },
             },
             yAxis: {
                 type: 'value',
-                boundaryGap: [0, '100%'],
-                splitLine: {
-                    show: false
-                }
+                boundaryGap: [0, '30%'],
             },
+            legend: {
+                data: legend
+            },
+            series: data
         };
 
         return option;
@@ -92,7 +99,7 @@
         var myChart = echarts.init(document.getElementById('main'));
 
         // 指定图表的配置项和数据
-        var option = setOption();
+        var option = setOption(dataList);
 
         // 使用刚指定的配置项和数据显示图表。
         myChart.setOption(option);
