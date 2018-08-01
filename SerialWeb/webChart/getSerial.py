@@ -28,8 +28,9 @@ class Port:
             if n:
                 tmp = self.port.read(n)
                 data += "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]" + tmp.decode('utf-8')
-            self.data.append(data)
-            self.port.flushInput()
+                self.port.flushInput()
+            if len(data) > 0:
+                self.data.append(data)
 
     def stop(self):
         self.alive = False
@@ -65,6 +66,21 @@ class SerialPort:
             pass
         return False
     
+    def getOpenList(self):
+        result = {'open': [], 'occupy': []}
+        for port in self.port_list:
+            if not self.isOpen(port[0]):
+                found = False
+                for item in self.portOpened:
+                    if item.getName() == port[0]:
+                        result['open'].append(item.getName())
+                        found = True
+                        break
+                if not found:
+                    result['occupy'].append(port[0])
+        return result
+                    
+    
     def openByOther(self, name):
         for port in self.portOpened:
             if port.getName() == name:
@@ -82,9 +98,12 @@ class SerialPort:
     def read_data(self, name):
         for port in self.portOpened:
             if port.getName() == name:
+                if len(port.data) == 0:
+                    continue
                 message = ''
                 for line in port.data:
                     message += line + "\r\n"
+                port.data = [];
                 return message
         return ''
 

@@ -10,6 +10,7 @@
     <script src="{% static 'webChart/echarts.min.js' %}"></script>
     <style type="text/css">
     div.top {
+        position: absolute;
         left: 30px;
         right: 30px;
         top: 10px;
@@ -18,9 +19,10 @@
         padding-top: 10px;
     }
     div.chart {
-        left: 0;
-        right: 0;
-        bottom: 0;
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
         top: 60px;
         width: 100%;
     }
@@ -30,27 +32,28 @@
     }
     </style>
     <script type="text/javascript">
-    var now = +new Date(1997, 9, 3);
-    var value = Math.random() * 1000;
-    var oneDay = 24 * 3600 * 1000;
-    function randomData() {
-        now = new Date(+now + oneDay);
-        value = value + Math.random() * 21 - 10;
-        return {
-            name: now.toString(),
-            value: [
-                [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'),
-                Math.round(value)
-            ]
+    function getData(msg) {
+        var date = new Date(msg.substring(msg.indexOf('[') + 1, msg.indexOf(']')));
+        var value = msg.substring(msg.indexOf(']') + 1);
+        return {name: date.toString(),
+            value: [date, value]}
+    }
+
+    function getDataOption(dataList){
+        var data = [];
+        for (var i = 0; i < dataList.length; i++){
+            data.push({
+                name: dataList[i].name,
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: dataList[i].data
+            });
         }
+        return data;
     }
 
     function setOption(){
-        var data = [];
-        for (var i = 0; i < 1000; i++) {
-            data.push(randomData());
-        }
-
         option = {
             title: {
                 text: '动态数据 + 时间坐标轴'
@@ -79,16 +82,9 @@
                     show: false
                 }
             },
-            series: [{
-                name: '模拟数据',
-                type: 'line',
-                showSymbol: false,
-                hoverAnimation: false,
-                data: data
-            }]
         };
 
-        return {option: option, data: data};
+        return option;
     }
 
     function drawChart(dataList){
@@ -96,72 +92,107 @@
         var myChart = echarts.init(document.getElementById('main'));
 
         // 指定图表的配置项和数据
-        var result = setOption();
-
-        setInterval(function () {
-            for (var i = 0; i < 5; i++) {
-                result.data.shift();
-                result.data.push(randomData());
-            }
-
-            myChart.setOption({
-                series: [{
-                    data: result.data
-                }]
-            });
-        }, 1000);
+        var option = setOption();
 
         // 使用刚指定的配置项和数据显示图表。
-        myChart.setOption(result.option);
+        myChart.setOption(option);
+        return myChart;
     }
 
-    function getMsg(button){
-        $.ajax({url: 'http://' + window.location.host + "/json",
-            data: {func: "read", name:button.value},
-            success: function(result){
-                if (result.flag == false){
-                    alert("读取失败");
-                    return;
+    function getMsg(chart, button, dataList){
+        setInterval(function(){
+            $.ajax({url: 'http://' + window.location.host + "/json",
+                data: {func: "read", name:button.value},
+                success: function(result){
+                    if (result.flag == false){
+                        alert("读取失败");
+                        return;
+                    }
+                    if (result.msg.length == 0)
+                        return;
+                    var data = getData(result.msg);
+                    for (var i = 0; i < dataList.length; i++){
+                        if (dataList[i].name == button.value){
+                            dataList[i].data.push(data);
+                        }
+                    }
+                    var option = getDataOption(dataList);
+                    chart.setOption({
+                        series: option
+                    });
                 }
-                alert(result.msg);
+            })
+        }, 1000);
+    }
+
+    function checkOpenList(chart, dataList){
+        $.ajax({url: 'http://' + window.location.host + "/json",
+            data: {func: "checkOpen", name: ""},
+            success: function(result){
+                if (result.flag == false)
+                    return;
+                var buttonList = $("button.com");
+                for (var j = 0; j < buttonList.length; j ++){
+                    var button = buttonList[j];
+                    for (var i = 0; i < result.openList.length; i++){
+                        if (button.value == result.openList[i]){
+                            $(button).removeClass('btn-success').addClass('btn-danger');
+                            button.innerHTML = "关闭" + button.value;
+                        }
+                    }
+                }
+                for (var i = 0; i < result.occupy.length; i++){
+                    $(".top")[0].innerHTML += "<button class='btn btn-default' disabled=true>" + result.occupy[i] + "被占用</button>"
+                }
+                $("button.com").on('click', function(){
+                    var btn = $(this)[0]
+                    if ($(btn).hasClass('btn-success')){
+                        $.ajax({url: 'http://' + window.location.host + "/json",
+                            data: {func: "open", name:btn.value},
+                            success: function(result){
+                                if (result.flag == false){
+                                    alert("打开失败");
+                                    return;
+                                }
+                                btn.innerHTML = "关闭" + btn.value;
+                                $(btn).removeClass('btn-success').addClass('btn-danger');
+                                getMsg(chart, btn, dataList);
+                            }
+                        });
+                    }
+                    else if ($(btn).hasClass('btn-danger')){
+                        $.ajax({url: 'http://' + window.location.host + "/json",
+                            data: {func:"close", name:btn.value},
+                            success: function(result){
+                                if (result.flag == false){
+                                    alert("关闭失败");
+                                    return;
+                                }
+                                btn.innerHTML = "打开" + btn.value;
+                                $(btn).removeClass('btn-danger').addClass('btn-success');
+                            }
+                        });
+                    }
+                });
+                checkOpenedCom(chart, dataList);
             }
         });
+    }
+
+    function checkOpenedCom(chart, dataList){
+        var openList = $("button").filter(".com.btn-danger");
+        for (var i = 0; i < openList.length; i++){
+            getMsg(chart, openList[i], dataList);
+        }
     }
 
     $(document).ready(function(){
         var dataList = [];
         for (var i = 0; i < $("button.com").length; i++){
-            dataList.push([]);
+            dataList.push({'name': $("button.com")[i].value, 'data':[]});
         }
-        $("button").click(function(){
-            var button = $(this)[0]
-            if ($(button).hasClass('btn-success')){
-                $.ajax({url: 'http://' + window.location.host + "/json",
-                    data: {func: "open", name:button.value},
-                    success: function(result){
-                        if (result.flag == false){
-                            alert("打开失败");
-                            return;
-                        }
-                        button.innerHTML = "关闭" + button.value;
-                        $(button).removeClass('btn-success').addClass('btn-danger');
-                    }
-                });
-            }
-            else if ($(button).hasClass('btn-danger')){
-                $.ajax({url: 'http://' + window.location.host + "/json",
-                    data: {func:"close", name:button.value},
-                    success: function(result){
-                        if (result.flag == false){
-                            alert("关闭失败");
-                            return;
-                        }
-                        button.innerHTML = "打开" + button.value;
-                        $(button).removeClass('btn-danger').addClass('btn-success');
-                    }
-                });
-            }
-        });
+        var chart = drawChart(dataList);
+        checkOpenList(chart, dataList);
     });
     </script>
 </head>
@@ -169,9 +200,12 @@
     <div class="top">
         {% for item in list %}
             {% for port, open in item.items %}
-                <button class="com btn {% if open %}btn-success{% else %}btn-danger{% endif %}" value="{{port}}">{% if open %}打开{% else %}关闭{% endif %}{{port}}</button>
+                <button class="com btn btn-success" value="{{port}}">打开{{port}}</button>
             {% endfor %}
         {% endfor %}
+        {% for item in list %} {% for port, open in item.items %}
+            <button class="download btn btn-primary">下载{{port}}数据</button>
+        {% endfor %} {% endfor %}
     </div>
     <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
     <div class="chart" id="main"></div>

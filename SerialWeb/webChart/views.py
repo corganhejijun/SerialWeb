@@ -29,4 +29,7 @@ def jsonData(request):
     elif func == "read":
         msg = serialPort.read_data(name)
         return JsonResponse({'flag':True, 'msg': msg})
-    return JsonResponse({'flag':false})
+    elif func == "checkOpen":
+        result = serialPort.getOpenList()
+        return JsonResponse({'flag':True, 'openList':result['open'], 'occupy':result['occupy']})
+    return JsonResponse({'flag':False})
