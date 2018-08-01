@@ -45,38 +45,48 @@
     function getData(msg) {
         var date = new Date(msg.substring(msg.indexOf('[') + 1, msg.indexOf(']')));
         var value = msg.substring(msg.indexOf(']') + 1);
-        var patt = /^[0-9_]+\s+([0-9-.]+)/; 
+        var patt = /^([0-9_]+)\s+([0-9-.]+)/; 
         var result = patt.exec(value);
-        return {name: date.toString(),
-            value: [date, result[1]]}
+        var chanel = result[1];
+        return {chanel:chanel, data:{name: date.toString(), value: [date, result[2]]}}
     }
 
     function getDataOption(dataList){
         var data = [];
+        var legend = [];
         for (var i = 0; i < dataList.length; i++){
-            data.push({
-                data: dataList[i].data
-            });
+            var chanelList = [];
+            for (var j = 0; j < dataList[i].data.length; j++){
+                var chanel = -1;
+                for (var k = 0; k < chanelList.length; k++){
+                    if (chanelList[k].chanel == dataList[i].data[j].chanel){
+                        chanel = k;
+                        break;
+                    }
+                }
+                if (chanel == -1){
+                    chanel = chanelList.length;
+                    chanelList.push({chanel: dataList[i].data[j].chanel, data:[]});
+                }
+                chanelList[chanel].data.push(dataList[i].data[j].data);
+            }
+            for (var j = 0; j < chanelList.length; j++){
+                var name = "串口:" + dataList[i].name + ' 通道:' + chanelList[j].chanel;
+                data.push({
+                    data: chanelList[j].data,
+                    name: name,
+                    type: 'line',
+                    showSymbol: false,
+                });
+                legend.push(name);
+            }
         }
-        return data;
+        return {data:data, legend:legend};
     }
 
     function setOption(dataList){
-        var color = ['#ff99ff', '#ff0000', '#0000cc', '#00ff99', '#cc9900', '#3366cc'];
         var legend = [];
-        for (var i = 0; i < dataList.length; i++){
-            legend.push(dataList[i].name);
-        }
-        var data = [];
-        for (var i = 0; i < dataList.length; i++){
-            data.push({
-                name: dataList[i].name,
-                type: 'line',
-                showSymbol: false,
-            });
-        }
         option = {
-            color: color,
             title: {
                 text: '串口数据图'
             },
@@ -96,9 +106,6 @@
                 type: 'value',
                 boundaryGap: [0, '30%'],
             },
-            legend: {
-                data: legend
-            },
             dataZoom: [
                 {
                     show: true,
@@ -116,7 +123,6 @@
                     saveAsImage: {}
                 }
             },
-            series: data
         };
 
         return option;
@@ -153,7 +159,10 @@
                     }
                     var option = getDataOption(dataList);
                     chart.setOption({
-                        series: option
+                        series: option.data,
+                        legend: {
+                            data: option.legend
+                        },
                     });
                 }
             })
@@ -169,7 +178,7 @@
                 for (var j = 0; j < dataList[i].data.length; j++){
                     var date = dataList[i].data[j].value[0];
                     result += "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]"
-                        + dataList[i].data[j].value[1];
+                        + dataList[i].data[j].value[1] + "\r\n";
                 }
                 if (result.length > 0)
                     $("#myModalData")[0].innerHTML = result;
