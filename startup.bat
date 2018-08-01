@@ -1,1 +1,3 @@
-python SerialWeb\manage.py runserver 8000
+cd SerialWeb
+call startup.bat
+PAUSE
