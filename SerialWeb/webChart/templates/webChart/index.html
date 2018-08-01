@@ -31,6 +31,10 @@
         height: 100%;
         width: 100%;
     }
+    .myModalData {
+        height: 100%;
+        width: 100%;
+    }
     </style>
     <script type="text/javascript">
     function getData(msg) {
@@ -132,6 +136,28 @@
         }, 1000);
     }
 
+    function getDataDown(button, dataList){
+        var name = button.value;
+        $("#myModalLabel")[0].innerHTML = "串口" + name + "数据";
+        for (var i = 0; i < dataList.length; i++){
+            if (dataList[i].name == name){
+                var result = "";
+                for (var j = 0; j < dataList[i].data.length; j++){
+                    var date = dataList[i].data[j].value[0];
+                    result += "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]"
+                        + dataList[i].data[j].value[1];
+                }
+                if (result.length > 0)
+                    $("#myModalData")[0].innerHTML = result;
+                else{
+                    $("#myModalLabel")[0].innerHTML = "串口" + name + "无数据";
+                    $("#myModalData")[0].innerHTML = "";
+                }
+            }
+        }
+
+    }
+
     function checkOpenList(chart, dataList){
         $.ajax({url: 'http://' + window.location.host + "/json",
             data: {func: "checkOpen", name: ""},
@@ -181,6 +207,11 @@
                         });
                     }
                 });
+                $("button.download").on('click', function(){
+                    var button = $(this)[0];
+                    getDataDown(button, dataList);
+                    $('#myModal').modal();
+                });
                 checkOpenedCom(chart, dataList);
             }
         });
@@ -200,21 +231,41 @@
         }
         var chart = drawChart(dataList);
         checkOpenList(chart, dataList);
+        $('#myModal').on('show.bs.modal', function () {
+            $('.modal .modal-body').css('overflow-y', 'auto'); 
+            $('.modal .modal-body').css('height', $(window).height() * 0.7);
+        });
     });
     </script>
 </head>
 <body>
     <div class="top">
-        {% for item in list %}
-            {% for port, open in item.items %}
-                <button class="com btn btn-success" value="{{port}}">打开{{port}}</button>
-            {% endfor %}
-        {% endfor %}
         {% for item in list %} {% for port, open in item.items %}
-            <button class="download btn btn-primary">下载{{port}}数据</button>
+        <button class="com btn btn-success" value="{{port}}">打开{{port}}</button>
+        {% endfor %} {% endfor %} {% for item in list %} {% for port, open in item.items %}
+        <button class="download btn btn-primary" value="{{port}}">下载{{port}}数据</button>
         {% endfor %} {% endfor %}
     </div>
     <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
     <div class="chart" id="main"></div>
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel"></h4>
+                </div>
+                <div class="modal-body" id="myModalBody">
+                    <textarea class="myModalData" id="myModalData"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
