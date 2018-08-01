@@ -8,7 +8,6 @@ port_list = serialPort.getPortList()
 # Create your views here.
 def index(request):
     list = []
-    open = []
     for port in port_list:
         name = port[0]
         isOpen = serialPort.isOpen(name)
@@ -18,8 +17,8 @@ def index(request):
     return render(request, 'webChart/index.html', {'list': list})
 
 def jsonData(request):
-    func = request.GET['func'];
-    name = request.GET['name'];
+    func = request.GET['func']
+    name = request.GET['name']
     if func == "open":
         serialPort.create(name)
         return JsonResponse({'flag':True})

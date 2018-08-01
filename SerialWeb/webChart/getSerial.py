@@ -3,6 +3,7 @@ import time
 import serial.tools.list_ports
 import threading
 import datetime
+import os
 
 class Port:
     def __init__(self, port):
@@ -11,6 +12,7 @@ class Port:
         self.port = port
         self.data = []
         self.thread = None
+        self.file = None
     
     def start(self):
         self.alive = True
@@ -19,6 +21,11 @@ class Port:
         self.thread = threading.Thread(target=self.Reader)
         self.thread.setDaemon(1)
         self.thread.start()
+        path = os.path.join(os.getcwd(), "_" + self.port.name + ".txt")
+        if (os.path.exists(path)):
+            self.file = open(path, "a")
+        else:
+            self.file = open(path, 'w')
 
     def Reader(self):
         while self.alive:
@@ -31,10 +38,12 @@ class Port:
                 self.port.flushInput()
             if len(data) > 0:
                 self.data.append(data)
+                self.file.write(data + "\r\n")
 
     def stop(self):
         self.alive = False
         self.thread.join()
+        self.file.close()
 
     def getName(self):
         return self.port.name

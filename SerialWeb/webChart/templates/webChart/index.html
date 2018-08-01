@@ -21,11 +21,11 @@
     }
     div.chart {
         position: absolute;
-        left: 0px;
-        right: 0px;
-        bottom: 0px;
+        left: 10px;
+        right: 10px;
+        bottom: 30px;
         top: 60px;
-        width: 100%;
+        width: 90%;
     }
     html, body{
         height: 100%;
@@ -35,13 +35,20 @@
         height: 100%;
         width: 100%;
     }
+    div.process {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
     </style>
     <script type="text/javascript">
     function getData(msg) {
         var date = new Date(msg.substring(msg.indexOf('[') + 1, msg.indexOf(']')));
         var value = msg.substring(msg.indexOf(']') + 1);
+        var patt = /^[0-9_]+\s+([0-9-.]+)/; 
+        var result = patt.exec(value);
         return {name: date.toString(),
-            value: [date, value]}
+            value: [date, result[1]]}
     }
 
     function getDataOption(dataList){
@@ -91,6 +98,23 @@
             },
             legend: {
                 data: legend
+            },
+            dataZoom: [
+                {
+                    show: true,
+                    realtime: true,
+                    start: 0,
+                    end: 100
+                },
+            ],
+            toolbox: {
+                feature: {
+                    dataZoom: {
+                        yAxisIndex: 'none'
+                    },
+                    restore: {},
+                    saveAsImage: {}
+                }
             },
             series: data
         };
@@ -235,6 +259,41 @@
             $('.modal .modal-body').css('overflow-y', 'auto'); 
             $('.modal .modal-body').css('height', $(window).height() * 0.7);
         });
+        $("button.data-process").click(function(){
+            $("#myModalLabel")[0].innerHTML = "数据处理";
+            $("#processButton").show();
+            $("#div-checkbox").show();
+            $("#myModal").modal();
+        });
+        $("#myModal").on("hidden.bs.modal", function () {
+            $("#processButton").hide();
+            $("#div-checkbox").hide();
+        });
+        $("#processButton").click(function(){
+            var text = $("#myModalData").val();
+            var lines = text.split('\n');
+            var afterProcess = "";
+            var count = 0;
+            for (var i = 0; i < lines.length; i++){
+                if (lines[i].length == 0)
+                    continue;
+                if ($("#checkboxData")[0].checked){
+                    var head = $("#checkboxInput").val();
+                    if (!lines[i].startsWith(head))
+                        continue;
+                }
+                count++;
+                var patt = /^(\d)__(\d)\s+([0-9-.]+)\[(\d+)-(\d+)-(\d+)\s(\d+):(\d+):([0-9.]+)\]$/; 
+                var result = patt.exec(lines[i]);
+                var s = "";
+                for (var j = 1; j < result.length; j++){
+                    s += result[j] + ',';
+                }
+                afterProcess += s + "\r\n";
+            }
+            $("#dataCount")[0].innerHTML = "共" + count + "条数据";
+            $("#myModalData").val(afterProcess);
+        });
     });
     </script>
 </head>
@@ -245,6 +304,9 @@
         {% endfor %} {% endfor %} {% for item in list %} {% for port, open in item.items %}
         <button class="download btn btn-primary" value="{{port}}">下载{{port}}数据</button>
         {% endfor %} {% endfor %}
+    </div>
+    <div class="process">
+        <button class="data-process btn btn-primary">数据处理</button>
     </div>
     <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
     <div class="chart" id="main"></div>
@@ -261,7 +323,17 @@
                 <div class="modal-body" id="myModalBody">
                     <textarea class="myModalData" id="myModalData"></textarea>
                 </div>
+                <div style="display: none" id="div-checkbox">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" id="checkboxData">筛选数据头
+                        </label>
+                        <input type="text" id="checkboxInput">
+                    </div>
+                    <h4 id="dataCount"></h4>
+                </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" style="display:none" id="processButton">处理</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
