@@ -42,9 +42,9 @@
     </style>
     <script type="text/javascript">
     function getData(msg) {
-        var patt = /^([0-9_]+)\s+([0-9-.]+)\[([0-9- :]+)\]/; 
+        var patt = /^([0-9_]+)\s+([0-9-.]+),([0-9-.]+),([0-9-.]+)\[([0-9- :]+)\]/; 
         var result = patt.exec(msg);
-        var date = new Date(result[3]);
+        var date = new Date(result[5]);
         var chanel = result[1];
         return {chanel:chanel, data:{name: date.toString(), value: [date, result[2]]}}
     }
