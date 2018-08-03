@@ -13,7 +13,6 @@
     div.top {
         position: absolute;
         left: 30px;
-        right: 30px;
         top: 10px;
         height: 60px;
         padding-left: 30px;
@@ -43,17 +42,18 @@
     </style>
     <script type="text/javascript">
     function getData(msg) {
-        var date = new Date(msg.substring(msg.indexOf('[') + 1, msg.indexOf(']')));
-        var value = msg.substring(msg.indexOf(']') + 1);
-        var patt = /^([0-9_]+)\s+([0-9-.]+)/; 
-        var result = patt.exec(value);
+        var patt = /^([0-9_]+)\s+([0-9-.]+)\[([0-9- :]+)\]/; 
+        var result = patt.exec(msg);
+        var date = new Date(result[3]);
         var chanel = result[1];
         return {chanel:chanel, data:{name: date.toString(), value: [date, result[2]]}}
     }
 
-    function getDataOption(dataList){
+    function getDataOption(chart, dataList){
         var data = [];
         var legend = [];
+        var min = null;
+        var max = null;
         for (var i = 0; i < dataList.length; i++){
             var chanelList = [];
             for (var j = 0; j < dataList[i].data.length; j++){
@@ -69,19 +69,48 @@
                     chanelList.push({chanel: dataList[i].data[j].chanel, data:[]});
                 }
                 chanelList[chanel].data.push(dataList[i].data[j].data);
+                
+                if (chart.getOption().legend.length > 0){
+                    var legendList = chart.getOption().legend[0];
+                    for (var k = 0; k < legendList.data.length; k++){
+                        if (legendList.selected[legendList.data[k]] != false && legendList.data[k] == "串口:" + dataList[i].name + " 通道:" + chanelList[chanel].chanel){
+                            var value = parseFloat(dataList[i].data[j].data.value[1])
+                            if (min == null || min > value)
+                                min = value
+                            if (max == null || max < value)
+                                max = value
+                        }
+                    }
+                }
             }
             for (var j = 0; j < chanelList.length; j++){
                 var name = "串口:" + dataList[i].name + ' 通道:' + chanelList[j].chanel;
+                var markpoint = [];
+                var last = chanelList[j].data;
+                last = last[last.length - 1].value;
+                markpoint.push({
+                    name: '固定 x 像素位置',
+                    yAxis: last[1],
+                    xAxis: last[0],
+                    value: last[1]
+                });
                 data.push({
                     data: chanelList[j].data,
                     name: name,
                     type: 'line',
                     showSymbol: false,
+                    markPoint: {
+                        label:{
+                            show: true
+                        },
+                        symbol: 'pin',
+                        data: markpoint
+                    }
                 });
                 legend.push(name);
             }
         }
-        return {data:data, legend:legend};
+        return {data:data, legend:legend, min: min, max: max};
     }
 
     function setOption(dataList){
@@ -137,6 +166,7 @@
 
         // 使用刚指定的配置项和数据显示图表。
         myChart.setOption(option);
+        window.onresize = myChart.resize;
         return myChart;
     }
 
@@ -157,12 +187,18 @@
                             dataList[i].data.push(data);
                         }
                     }
-                    var option = getDataOption(dataList);
+                    var option = getDataOption(chart, dataList);
+                    var max = Math.ceil(option.max + (option.max - option.min) * 0.2);
+                    var min = Math.floor(option.min - (option.max - option.min) * 0.1);
                     chart.setOption({
                         series: option.data,
                         legend: {
                             data: option.legend
                         },
+                        yAxis : {
+                            min: min,
+                            max: max
+                        }
                     });
                 }
             })
@@ -176,9 +212,11 @@
             if (dataList[i].name == name){
                 var result = "";
                 for (var j = 0; j < dataList[i].data.length; j++){
-                    var date = dataList[i].data[j].value[0];
-                    result += "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]"
-                        + dataList[i].data[j].value[1] + "\r\n";
+                    var chanel = dataList[i].data[j].chanel;
+                    var date = dataList[i].data[j].data.value[0];
+                    result += chanel + "  " + dataList[i].data[j].data.value[1] 
+                        + "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]"
+                        + "\r\n";
                 }
                 if (result.length > 0)
                     $("#myModalData")[0].innerHTML = result;
@@ -189,6 +227,28 @@
             }
         }
 
+    }
+
+    function applyFilter(chart){
+        var portName = $("#filter-select").val();
+        var legend = {};
+        var legendList = chart.getOption().legend[0].data;
+        for (var j = 0; j < legendList.length; j++){
+            var selected = false;
+            var legendName = legendList[j];
+            if (legendName.startsWith("串口:" + portName))
+                selected = true;
+            if ($("#checkbox-filter")[0].checked)
+                legend[legendName] = selected;
+            else
+                legend[legendName] = true;
+        }
+        var option = {
+            legend: {
+                selected: legend,
+            },
+        }
+        chart.setOption(option);
     }
 
     function checkOpenList(chart, dataList){
@@ -244,6 +304,12 @@
                     var button = $(this)[0];
                     getDataDown(button, dataList);
                     $('#myModal').modal();
+                });
+                $("#checkbox-filter").on('change', function(){
+                    applyFilter(chart);
+                });
+                $("#filter-select").on("change", function(){
+                    applyFilter(chart);
                 });
                 checkOpenedCom(chart, dataList);
             }
@@ -310,9 +376,21 @@
     <div class="top">
         {% for item in list %} {% for port, open in item.items %}
         <button class="com btn btn-success" value="{{port}}">打开{{port}}</button>
-        {% endfor %} {% endfor %} {% for item in list %} {% for port, open in item.items %}
+        {% endfor %} {% endfor %} 
+        {% for item in list %} {% for port, open in item.items %}
         <button class="download btn btn-primary" value="{{port}}">下载{{port}}数据</button>
         {% endfor %} {% endfor %}
+        <label>
+            <input type="checkbox" value="" id="checkbox-filter">
+            过滤 
+        </label>
+        <select id="filter-select">
+        {% for item in list %} {% for port, open in item.items %}
+            <option>{{port}}</option>
+        {% endfor %} {% endfor %}
+        </select>
+    </div>
+    <div class="filter">
     </div>
     <div class="process">
         <button class="data-process btn btn-primary">数据处理</button>

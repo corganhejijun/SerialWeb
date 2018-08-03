@@ -34,7 +34,7 @@ class Port:
             data = ''
             if n:
                 tmp = self.port.read(n)
-                data += "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]" + tmp.decode('utf-8')
+                data += tmp.decode('utf-8') + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                 self.port.flushInput()
             if len(data) > 0:
                 self.data.append(data)
