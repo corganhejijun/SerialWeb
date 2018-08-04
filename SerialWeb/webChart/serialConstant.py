@@ -13,26 +13,16 @@ BEGIN_0 = 0
 BEGIN_1 = 1
 DATA_1_1 = 2
 DATA_1_2 = 3
-DATA_1_3 = 4
-DATA_1_4 = 5
-DATA_2_1 = 6
-DATA_2_2 = 7
-DATA_2_3 = 8
-DATA_2_4 = 9
-DATA_2_5 = 10
-DATA_2_6 = 11
-DATA_2_7 = 12
-DATA_2_8 = 13
-DATA_3_1 = 14
-DATA_3_2 = 15
-DATA_3_3 = 16
-DATA_3_4 = 17
-DATA_3_5 = 18
-DATA_3_6 = 19
-DATA_3_7 = 20
-DATA_3_8 = 21
-END_0 = 22
-END_1 = 23
+DATA_2_1 = 4
+DATA_2_2 = 5
+DATA_2_3 = 6
+DATA_2_4 = 7
+DATA_3_1 = 8
+DATA_3_2 = 9
+DATA_3_3 = 10
+DATA_3_4 = 11
+END_0 = 12
+END_1 = 13
 
 
 def hex2Double(s):
@@ -40,7 +30,19 @@ def hex2Double(s):
     fp = ctypes.cast(cp, ctypes.POINTER(ctypes.c_double))
     return fp.contents.value
 
-def double2hx(s):
+def double2hex(s):
     fp = ctypes.pointer(ctypes.c_double(s))
     cp = ctypes.cast(fp, ctypes.POINTER(ctypes.c_longlong))
     return hex(cp.contents.value)
+
+def readData1(data):
+    data1 = (data[DATA_1_1] << 8) + data[DATA_1_2]
+    return data1
+
+def readData2(data):
+    data2 = (data[DATA_2_1] << 24) + (data[DATA_2_2] << 16) + (data[DATA_2_3] << 8) + data[DATA_2_4]
+    return data2
+
+def readData3(data):
+    data3 = (data[DATA_3_1] << 24) + (data[DATA_3_2] << 16) + (data[DATA_3_3] << 8) + data[DATA_3_4]
+    return data3

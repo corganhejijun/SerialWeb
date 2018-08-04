@@ -53,14 +53,11 @@ class Port:
                 if tmp[const.BEGIN_0] == const.PORT_CHANEL_LIST_X[currentChannel][0] \
                     and tmp[const.BEGIN_1] == const.PORT_CHANEL_LIST_X[currentChannel][1] \
                     and tmp[const.END_0] == const.END_MARK_X[0] and tmp[const.END_1] == const.END_MARK_X[1]:
-                    data1 = (tmp[const.DATA_1_1] << 24) + (tmp[const.DATA_1_2] << 16) + (tmp[const.DATA_1_3] << 8) + tmp[const.DATA_1_4]
-                    data1 = data1 << 32
+                    data1 = const.readData1(tmp)
                     data1 = const.hex2Double(data1)
-                    data2 = (tmp[const.DATA_2_1] << 56) + (tmp[const.DATA_2_2] << 48) + (tmp[const.DATA_2_3] << 40) + (tmp[const.DATA_2_4] << 32) \
-                            + (tmp[const.DATA_2_5] << 24) + (tmp[const.DATA_2_6] << 16) + (tmp[const.DATA_2_7] << 8) + tmp[const.DATA_2_8]
+                    data2 = const.readData2(tmp)
                     data2 = const.hex2Double(data2)
-                    data3 = (tmp[const.DATA_3_1] << 56) + (tmp[const.DATA_3_2] << 48) + (tmp[const.DATA_3_3] << 40) + (tmp[const.DATA_3_4] << 32) \
-                            + (tmp[const.DATA_3_5] << 24) + (tmp[const.DATA_3_6] << 16) + (tmp[const.DATA_3_7] << 8) + tmp[const.DATA_3_8]
+                    data3 = const.readData3(tmp)
                     data3 = const.hex2Double(data3)
                     data += const.CHANNEL_STRING[currentChannel] + "   " + str(data1) + ',' + str(data2) + ',' + str(data3) + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                     # data += tmp.decode('utf-8') + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
