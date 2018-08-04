@@ -37,12 +37,15 @@ def double2hex(s):
 
 def readData1(data):
     data1 = (data[DATA_1_1] << 8) + data[DATA_1_2]
+    data1 = data1 << (32 + 16)
     return data1
 
 def readData2(data):
     data2 = (data[DATA_2_1] << 24) + (data[DATA_2_2] << 16) + (data[DATA_2_3] << 8) + data[DATA_2_4]
+    data2 = data2 << 32
     return data2
 
 def readData3(data):
     data3 = (data[DATA_3_1] << 24) + (data[DATA_3_2] << 16) + (data[DATA_3_3] << 8) + data[DATA_3_4]
+    data3 = data3 << 32
     return data3
