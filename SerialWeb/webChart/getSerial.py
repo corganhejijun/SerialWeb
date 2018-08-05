@@ -6,7 +6,7 @@ import datetime
 import os
 from . import serialConstant as const
 
-WAIT_FOR_RECEIVE = 2  #seconds
+WAIT_FOR_RECEIVE = 1  #seconds
 PHASE_BEFORE_SEND = 0
 PHASE_AFTER_SEND = 1
 PHASE_RECEIVED = 2

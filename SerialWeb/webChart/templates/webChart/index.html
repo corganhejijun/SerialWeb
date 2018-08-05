@@ -72,16 +72,44 @@
     }
     </style>
     <script type="text/javascript">
-    function getData(msg) {
+    function getData(dataList, msg) {
+        var param_table = {
+            K1: [1, 1, 1, 1, 1, 1],
+            T1: [1, 1, 1, 1, 1, 1],
+            T2: [1, 1, 1, 1, 1, 1],
+            K22: [1, 1, 1, 1, 1, 1],
+            B2: [1, 1, 1, 1, 1, 1]
+        }
         var patt = /^([0-9_]+)\s+([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+)\[([0-9- :]+)\]/; 
         var result = patt.exec(msg);
         var date = new Date(result[6]);
         var chanel = result[1];
+        var data4 = 0;
+        var T = parseFloat(result[2]);
+        var V1 = parseFloat(result[3]);
+        var V2 = parseFloat(result[4]);
+        var d = result[5];
+        var K1 = param_table.K1[d];
+        var T1 = param_table.T1[d];
+        var T2 = param_table.T2[d];
+        var K22 = param_table.K22[d];
+        var B2 = param_table.B2[d];
+        if (dataList.length > 0){
+            for (var i = dataList.length - 1; i >= 0; i--){
+                if (dataList[i].chanel == chanel){
+                    var last_V2 = parseFloat(dataList[i].data[2].value[1]);
+                    if (V1 <= 0)
+                        data4 = V1 + (V2 - last_V2) * V1 / V2 * -1 * K1 + (T2 + T1) * (K22 * V1 + B2)
+                    else
+                        data4 = V1 + (V2 - last_V2) * V1 / V2 * K1 + (T2 + T1) * (K22 * V1 + B2)
+                }
+            }
+        }
         return {chanel:chanel, data:[
-            {name: date.toString(), value: [date, result[2]]},
-            {name: date.toString(), value: [date, result[3]]},
-            {name: date.toString(), value: [date, result[4]]},
-            {name: date.toString(), value: [date, result[5]]}
+            {name: date.toString(), value: [date, T]},
+            {name: date.toString(), value: [date, V1]},
+            {name: date.toString(), value: [date, V2]},
+            {name: date.toString(), value: [date, data4]}
         ]}
     }
 
@@ -245,9 +273,9 @@
                     for (var i = 0; i < result.msg.length; i++){
                         var msg = result.msg[i];
                         var comName = msg.substring(0, msg.indexOf(":"))
-                        var data = getData(msg.substring(msg.indexOf(":") + 1));
                         for (var j = 0; j < dataList.length; j++){
                             if (dataList[j].name == comName){
+                                var data = getData(dataList[j].data, msg.substring(msg.indexOf(":") + 1));
                                 dataList[j].data.push(data);
                                 break;
                             }
