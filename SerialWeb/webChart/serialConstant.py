@@ -9,8 +9,8 @@ CHANNEL_STRING = ['1_1', '1_2', '1_3', \
                   '2_1', '2_2', '2_3']
 PORT_CHANNEL_STRING = ['1_1', '1_2', '1_3', \
                   '2_1', '2_2', '2_3']
-END_MARK = '\x0A\x0D'
-# END_MARK_X = [0x0A, 0x0D]
+END_MARK = '\x0D\x0A'
+# END_MARK_X = [0x0D, 0x0A]
 
 #BEGIN_0 = 0
 #BEGIN_1 = 1
@@ -32,7 +32,7 @@ def readData(tmp):
     data1 = float(data.group(1))
     data2 = float(data.group(2))
     data3 = float(data.group(3))
-    data4 = 3 * (int(tmp[0]) - 1) + int(tmp[2])
+    data4 = 3 * (int(tmp[0]) - 1) + int(tmp[2]) - 1
     return data1, data2, data3, data4
 
 
