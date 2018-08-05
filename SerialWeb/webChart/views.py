@@ -5,28 +5,38 @@ import json
 
 serialPort = SerialPort()
 port_list = serialPort.getPortList()
-# Create your views here.
-def index(request):
+
+def getOpenList():
     list = []
     for port in port_list:
         name = port[0]
-        isOpen = serialPort.isOpen(name)
-        if not isOpen and serialPort.openByOther(name):
+        opened = not serialPort.ready2Open(name)
+        if opened and not serialPort.openByMe(name):
             continue
-        list.append({name:isOpen})
-    return render(request, 'webChart/index.html', {'list': list})
+        list.append({name:opened})
+    return list
+
+# Create your views here.
+def index(request):
+    return render(request, 'webChart/index.html', {'list': getOpenList()})
+
+def chart(request):
+    return render(request, 'webChart/chart.html')
 
 def jsonData(request):
     func = request.GET['func']
-    name = request.GET['name']
     if func == "open":
+        name = request.GET['name']
         serialPort.create(name)
         return JsonResponse({'flag':True})
     elif func == "close":
+        name = request.GET['name']
         serialPort.port_close(name)
         return JsonResponse({'flag':True})
     elif func == "read":
-        msg = serialPort.read_data(name)
+        name = request.GET['name']
+        nameList = name.split(",")
+        msg = serialPort.read_data(nameList)
         return JsonResponse({'flag':True, 'msg': msg})
     elif func == "checkOpen":
         result = serialPort.getOpenList()

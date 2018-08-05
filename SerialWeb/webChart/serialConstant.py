@@ -1,10 +1,13 @@
 import ctypes
+import re
 
 PORT_CHANEL_LIST = ['\x01\x11', '\x01\x12', '\x01\x13', \
                     '\x02\x21', '\x02\x22', '\x02\x23']
 PORT_CHANEL_LIST_X = [[0x01, 0x11], [0x01, 0x12], [0x01, 0x13], \
                       [0x02, 0x21], [0x02, 0x22], [0x02, 0x03]]
 CHANNEL_STRING = ['1__1', '1__2', '1__3', \
+                  '2__1', '2__2', '2__3']
+PORT_CHANNEL_STRING = ['1__1', '1__2', '1__3', \
                   '2__1', '2__2', '2__3']
 END_MARK = '\x0A\x0D'
 END_MARK_X = [0x0A, 0x0D]
@@ -24,7 +27,24 @@ DATA_3_4 = 11
 END_0 = 12
 END_1 = 13
 
+K1 = 1
+K2 = 1
+T1 = 1
+T2 = 1
 
+def calData4(T, V1, V2):
+    return V1 + (V2 - V2) * (V1 / V2) * K1 * V1 + (T2 - T1) * K2
+
+def readData(tmp):
+    data = re.match(r'^[0-9_]+[\s]+([0-9-.]+)[\s]+([0-9-.]+)[\s]+([0-9-.]+)', tmp)
+    data1 = float(data.group(1))
+    data2 = float(data.group(2))
+    data3 = float(data.group(3))
+    return data1, data2, data3, calData4(data1, data2, data3)
+
+
+
+## deprecated
 def hex2Double(s):
     cp = ctypes.pointer(ctypes.c_longlong(s))
     fp = ctypes.cast(cp, ctypes.POINTER(ctypes.c_double))

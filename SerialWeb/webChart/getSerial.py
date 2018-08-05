@@ -50,16 +50,10 @@ class Port:
             data = ''
             if n:
                 tmp = self.port.read(n)
-                if tmp[const.BEGIN_0] == const.PORT_CHANEL_LIST_X[currentChannel][0] \
-                    and tmp[const.BEGIN_1] == const.PORT_CHANEL_LIST_X[currentChannel][1] \
-                    and tmp[const.END_0] == const.END_MARK_X[0] and tmp[const.END_1] == const.END_MARK_X[1]:
-                    data1 = const.readData1(tmp)
-                    data1 = const.hex2Double(data1)
-                    data2 = const.readData2(tmp)
-                    data2 = const.hex2Double(data2)
-                    data3 = const.readData3(tmp)
-                    data3 = const.hex2Double(data3)
-                    data += const.CHANNEL_STRING[currentChannel] + "   " + str(data1) + ',' + str(data2) + ',' + str(data3) + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
+                tmp = tmp.decode('utf-8')
+                if tmp.startswith(const.PORT_CHANNEL_STRING[currentChannel]):
+                    data1, data2, data3, data4 = const.readData(tmp)
+                    data += const.CHANNEL_STRING[currentChannel] + "   " + str(data1) + ',' + str(data2) + ',' + str(data3) + ',' + str(data4) + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                     # data += tmp.decode('utf-8') + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                     self.port.flushInput()
             received = False
@@ -99,7 +93,7 @@ class SerialPort:
         portObj.start()
         self.portOpened.append(portObj);
 
-    def isOpen(self, name):
+    def ready2Open(self, name):
         try:
             for port in self.port_list:
                 if name == port[0]:
@@ -112,7 +106,7 @@ class SerialPort:
     def getOpenList(self):
         result = {'open': [], 'occupy': []}
         for port in self.port_list:
-            if not self.isOpen(port[0]):
+            if not self.ready2Open(port[0]):
                 found = False
                 for item in self.portOpened:
                     if item.getName() == port[0]:
@@ -124,11 +118,11 @@ class SerialPort:
         return result
                     
     
-    def openByOther(self, name):
+    def openByMe(self, name):
         for port in self.portOpened:
             if port.getName() == name:
-                return False
-        return True
+                return True 
+        return False
 
     def port_close(self, name):
         for item in self.portOpened:
@@ -138,17 +132,19 @@ class SerialPort:
                 self.portOpened.remove(item)
                 return
 
-    def read_data(self, name):
-        for port in self.portOpened:
-            if port.getName() == name:
-                if len(port.data) == 0:
-                    continue
-                message = ''
-                for line in port.data:
-                    message += line + "\r\n"
-                port.data = [];
-                return message
-        return ''
+    def read_data(self, nameList):
+        message = []
+        for name in nameList:
+            for port in self.portOpened:
+                if port.getName() == name:
+                    if len(port.data) == 0:
+                        continue
+                    text = name + ":"
+                    for line in port.data:
+                        text += line + "\r\n"
+                    port.data = [];
+                    message.append(text)
+        return message
 
     def getPortList(self):
 	    self.port_list = list(serial.tools.list_ports.comports())
