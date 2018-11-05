@@ -72,7 +72,12 @@
     }
     </style>
     <script type="text/javascript">
-    function getData(dataList, msg) {
+    function getData(dataList, msg, dataListAll) {
+        /*
+          dataList: 上一次的数据
+          msg: 本次要处理的数据
+          dataListAll: 所有数据
+        */
         var param_table = {
             K1: [1, 1, 1, 1, 1, 1],
             T1: [1, 1, 1, 1, 1, 1],
@@ -91,7 +96,18 @@
         var d = result[5];
         var K1 = param_table.K1[d];
         var T1 = param_table.T1[d];
+        if (dataListAll.length > 1){
+            T1 = dataList[0].data[0].value[1];
+        }
         var T2 = param_table.T2[d];
+        if (dataListAll.length >= 49){
+            T2 = 0;
+            for (var i = dataListAll.length - 49; i < dataListAll.length; i++){
+                T2 += dataListAll[i].data[0].value[1];
+            }
+            T2 += T;    // 第50个数
+            T2 /= 50;   // 求平均
+        }
         var K22 = param_table.K22[d];
         var B2 = param_table.B2[d];
         if (dataList.length > 0){
@@ -275,7 +291,7 @@
                         var comName = msg.substring(0, msg.indexOf(":"))
                         for (var j = 0; j < dataList.length; j++){
                             if (dataList[j].name == comName){
-                                var data = getData(dataList[j].data, msg.substring(msg.indexOf(":") + 1));
+                                var data = getData(dataList[j].data, msg.substring(msg.indexOf(":") + 1), dataList);
                                 dataList[j].data.push(data);
                                 break;
                             }
