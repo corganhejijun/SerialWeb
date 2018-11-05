@@ -6,7 +6,7 @@ import datetime
 import os
 from . import serialConstant as const
 
-WAIT_FOR_RECEIVE = 1  #seconds
+WAIT_FOR_RECEIVE = 2  #seconds
 PHASE_BEFORE_SEND = 0
 PHASE_AFTER_SEND = 1
 PHASE_RECEIVED = 2
@@ -43,16 +43,21 @@ class Port:
             time.sleep(0.1)
             if phase == PHASE_BEFORE_SEND:
                 self.port.write((const.PORT_CHANEL_LIST[currentChannel] + const.END_MARK).encode('utf-8'))
+                print("write data to port %s" % const.CHANNEL_STRING[currentChannel])
                 beginTime = datetime.datetime.now()
                 phase = PHASE_AFTER_SEND
                 continue
             n = self.port.inWaiting()
             data = ''
             if n:
+                phase = PHASE_BEFORE_SEND
                 tmp = self.port.read(n)
                 tmp = tmp.decode('utf-8')
+                print("get string %s" % tmp)
                 if tmp.startswith(const.PORT_CHANNEL_STRING[currentChannel]):
                     data1, data2, data3, data4 = const.readData(tmp)
+                    if not data1:
+                        continue
                     data += const.CHANNEL_STRING[currentChannel] + "   " + str(data1) + ',' + str(data2) + ',' + str(data3) + ',' + str(data4) + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                     # data += tmp.decode('utf-8') + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                     self.port.flushInput()
@@ -61,7 +66,6 @@ class Port:
                 received = True
                 self.data.append(data)
                 self.file.write(data + "\r\n")
-                phase = PHASE_BEFORE_SEND
                 currentChannel += 1
             if not received:
                 if (datetime.datetime.now() - beginTime) > datetime.timedelta(seconds=WAIT_FOR_RECEIVE):

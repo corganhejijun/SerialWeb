@@ -1,14 +1,14 @@
 import ctypes
 import re
 
-PORT_CHANEL_LIST = ['\x01\x11', '\x01\x12', '\x01\x13', \
-                    '\x02\x21', '\x02\x22', '\x02\x23']
+PORT_CHANEL_LIST = ['\x02\x23', '\x02\x23', '\x02\x23', \
+                    '\x02\x23', '\x02\x23', '\x02\x23']
 #PORT_CHANEL_LIST_X = [[0x01, 0x11], [0x01, 0x12], [0x01, 0x13], \
 #                      [0x02, 0x21], [0x02, 0x22], [0x02, 0x03]]
-CHANNEL_STRING = ['1_1', '1_2', '1_3', \
-                  '2_1', '2_2', '2_3']
-PORT_CHANNEL_STRING = ['1_1', '1_2', '1_3', \
-                  '2_1', '2_2', '2_3']
+CHANNEL_STRING = ['2_3', '2_3', '2_3', \
+                  '2_3', '2_3', '2_3']
+PORT_CHANNEL_STRING = ['2_3', '2_3', '2_3', \
+                  '2_3', '2_3', '2_3']
 END_MARK = '\x0D\x0A'
 # END_MARK_X = [0x0D, 0x0A]
 
@@ -29,6 +29,9 @@ END_MARK = '\x0D\x0A'
 
 def readData(tmp):
     data = re.match(r'^[0-9_]+[\s]+([0-9-.]+)[\s]+([0-9-.]+)[\s]+([0-9-.]+)', tmp)
+    if not data:
+        print("get error msg %s" % tmp)
+        return None, None, None, None
     data1 = float(data.group(1))
     data2 = float(data.group(2))
     data3 = float(data.group(3))
