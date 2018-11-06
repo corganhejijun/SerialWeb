@@ -55,9 +55,11 @@ class Port:
                 tmp = tmp.decode('utf-8')
                 print("get string %s" % tmp)
                 if tmp.startswith(const.PORT_CHANNEL_STRING[currentChannel]):
+                    # TODO::
                     data1, data2, data3, data4 = const.readData(tmp)
                     if not data1:
                         continue
+                    # TODO::
                     data += const.CHANNEL_STRING[currentChannel] + "   " + str(data1) + ',' + str(data2) + ',' + str(data3) + ',' + str(data4) + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                     # data += tmp.decode('utf-8') + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                     self.port.flushInput()
@@ -95,7 +97,7 @@ class SerialPort:
             port.open()
         portObj = Port(port)
         portObj.start()
-        self.portOpened.append(portObj);
+        self.portOpened.append(portObj)
 
     def ready2Open(self, name):
         try:
@@ -146,10 +148,10 @@ class SerialPort:
                     text = name + ":"
                     for line in port.data:
                         text += line + "\r\n"
-                    port.data = [];
+                    port.data = []
                     message.append(text)
         return message
 
     def getPortList(self):
 	    self.port_list = list(serial.tools.list_ports.comports())
-	    return self.port_list;
+	    return self.port_list

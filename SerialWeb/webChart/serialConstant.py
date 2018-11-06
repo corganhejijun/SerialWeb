@@ -28,6 +28,7 @@ END_MARK = '\x0D\x0A'
 #END_1 = 13
 
 def readData(tmp):
+    # TODO::
     data = re.match(r'^[0-9_]+[\s]+([0-9-.]+)[\s]+([0-9-.]+)[\s]+([0-9-.]+)', tmp)
     if not data:
         print("get error msg %s" % tmp)

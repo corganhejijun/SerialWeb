@@ -78,6 +78,31 @@
           msg: 本次要处理的数据
           dataListAll: 所有数据
         */
+        var patt = /^([0-9_]+)\s+([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+)\[([0-9- :]+)\]/; 
+        var result = patt.exec(msg);
+        var date = new Date(result[6]);
+        var chanel = result[1];
+        var T = parseFloat(result[2]);
+        var V1 = parseFloat(result[3]);
+        var V2 = parseFloat(result[4]);
+        var d = result[5];
+        var data4 = calculation(T, V1, V2, d, dataListAll, dataList);
+        var final = [];
+        final.push({chanel:chanel, data:[
+            {name: date.toString(), value: [date, T]},
+            {name: date.toString(), value: [date, V1]},
+            {name: date.toString(), value: [date, V2]},
+            {name: date.toString(), value: [date, data4]}
+        ]});
+        // TODO::
+        // if (chanel == "2_1")
+        //     chanel2 = "2_2";
+        //result.push({chanel: chanel2, data:[]});
+        //result.push({chanel: chanel3, data:[]});
+        return result;
+    }
+
+    function calculation(T, V1, V2, d, dataListAll, dataList){
         var param_table = {
             K1: [1, 1, 1, 1, 1, 1],
             T1: [1, 1, 1, 1, 1, 1],
@@ -85,15 +110,7 @@
             K22: [1, 1, 1, 1, 1, 1],
             B2: [1, 1, 1, 1, 1, 1]
         }
-        var patt = /^([0-9_]+)\s+([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+)\[([0-9- :]+)\]/; 
-        var result = patt.exec(msg);
-        var date = new Date(result[6]);
-        var chanel = result[1];
         var data4 = 0;
-        var T = parseFloat(result[2]);
-        var V1 = parseFloat(result[3]);
-        var V2 = parseFloat(result[4]);
-        var d = result[5];
         var K1 = param_table.K1[d];
         var T1 = param_table.T1[d];
         if (dataListAll.length > 1){
@@ -121,12 +138,7 @@
                 }
             }
         }
-        return {chanel:chanel, data:[
-            {name: date.toString(), value: [date, T]},
-            {name: date.toString(), value: [date, V1]},
-            {name: date.toString(), value: [date, V2]},
-            {name: date.toString(), value: [date, data4]}
-        ]}
+        return data4;
     }
 
     function getDataDown(button, dataList){
@@ -292,7 +304,8 @@
                         for (var j = 0; j < dataList.length; j++){
                             if (dataList[j].name == comName){
                                 var data = getData(dataList[j].data, msg.substring(msg.indexOf(":") + 1), dataList);
-                                dataList[j].data.push(data);
+                                for (var k = 0; k < data.length; k++)
+                                    dataList[j].data.push(data[k]);
                                 break;
                             }
                         }
