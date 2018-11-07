@@ -78,15 +78,15 @@
           msg: 本次要处理的数据
           dataListAll: 所有数据
         */
-        var patt = /^([0-9_]+)\s+([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+)\[([0-9- :]+)\]/; 
+        var patt = /^([0-9_]+)\s+([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+)\[([0-9- :]+)\]/; 
         var result = patt.exec(msg);
-        var date = new Date(result[6]);
+        var date = new Date(result[12]);
         var chanel = result[1];
         var T = parseFloat(result[2]);
         var V1 = parseFloat(result[3]);
         var V2 = parseFloat(result[4]);
         var d = result[5];
-        var data4 = calculation(T, V1, V2, d, dataListAll, dataList);
+        var data4 = calculation(chanel, T, V1, V2, d, dataListAll, dataList);
         var final = [];
         final.push({chanel:chanel, data:[
             {name: date.toString(), value: [date, T]},
@@ -99,10 +99,10 @@
         //     chanel2 = "2_2";
         //result.push({chanel: chanel2, data:[]});
         //result.push({chanel: chanel3, data:[]});
-        return result;
+        return final;
     }
 
-    function calculation(T, V1, V2, d, dataListAll, dataList){
+    function calculation(chanel, T, V1, V2, d, dataListAll, dataList){
         var param_table = {
             K1: [1, 1, 1, 1, 1, 1],
             T1: [1, 1, 1, 1, 1, 1],

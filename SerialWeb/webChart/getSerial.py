@@ -38,13 +38,15 @@ class Port:
         beginTime = 0
         currentChannel = 0
         phase = PHASE_BEFORE_SEND
+        received = False
         while self.alive:
             currentChannel = currentChannel%len(const.PORT_CHANEL_LIST)
-            time.sleep(0.1)
+            time.sleep(0.5)
             if phase == PHASE_BEFORE_SEND:
                 self.port.write((const.PORT_CHANEL_LIST[currentChannel] + const.END_MARK).encode('utf-8'))
                 print("write data to port %s" % const.CHANNEL_STRING[currentChannel])
-                beginTime = datetime.datetime.now()
+                if received:
+                    beginTime = datetime.datetime.now()
                 phase = PHASE_AFTER_SEND
                 continue
             n = self.port.inWaiting()
@@ -56,19 +58,20 @@ class Port:
                 print("get string %s" % tmp)
                 if tmp.startswith(const.PORT_CHANNEL_STRING[currentChannel]):
                     # TODO::
-                    data1, data2, data3, data4 = const.readData(tmp)
-                    if not data1:
+                    data1_T1, data2_RH1, data3_T2, data4_RH2, data5_T3, data6_RH3, data7_V1, data8_V2, data9_V3, data10_VR = const.readData(tmp)
+                    if not data1_T1:
                         continue
                     # TODO::
-                    data += const.CHANNEL_STRING[currentChannel] + "   " + str(data1) + ',' + str(data2) + ',' + str(data3) + ',' + str(data4) + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
+                    data += const.CHANNEL_STRING[currentChannel] + "   " + str(data1_T1) + ',' + str(data2_RH1) + ',' + str(data3_T2) + ',' + str(data4_RH2) + ',' + str(data5_T3)+ ',' + str(data6_RH3)+ ',' + str(data7_V1)+ ',' + str(data8_V2)+ ',' + str(data9_V3)+ ',' + str(data10_VR)+ "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                     # data += tmp.decode('utf-8') + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                     self.port.flushInput()
-            received = False
             if len(data) > 0:
                 received = True
                 self.data.append(data)
                 self.file.write(data + "\r\n")
                 currentChannel += 1
+            else:
+                received = False
             if not received:
                 if (datetime.datetime.now() - beginTime) > datetime.timedelta(seconds=WAIT_FOR_RECEIVE):
                     phase = PHASE_BEFORE_SEND
