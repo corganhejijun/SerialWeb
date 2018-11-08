@@ -65,17 +65,20 @@
                     chanel = chanelList.length;
                     chanelList.push({chanel: dataList[i].data[j].chanel, data:[]});
                 }
-                chanelList[chanel].data.push(dataList[i].data[j].data[dataNum]);
+                if (dataList[i].data[j].data[dataNum].value[1] != null)
+                    chanelList[chanel].data.push(dataList[i].data[j].data[dataNum]);
                 
                 if (chart.getOption().legend.length > 0){
                     var legendList = chart.getOption().legend[0];
                     for (var k = 0; k < legendList.data.length; k++){
                         if (legendList.selected[legendList.data[k]] != false && legendList.data[k] == "串口:" + dataList[i].name + " 通道:" + chanelList[chanel].chanel){
                             var value = parseFloat(dataList[i].data[j].data[dataNum].value[1])
-                            if (min == null || min > value)
-                                min = value
-                            if (max == null || max < value)
-                                max = value
+                            if (!isNaN(value)){
+                                if (min == null || min > value)
+                                    min = value
+                                if (max == null || max < value)
+                                    max = value
+                            }
                         }
                     }
                 }
