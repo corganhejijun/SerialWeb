@@ -9,7 +9,7 @@ PORT_CHANNEL_STRING = ['1_1', '2_1']
 END_MARK = '\x0D\x0A'
 
 def readData(tmp):
-    # TODO::
+    # TODO::数据格式：1_1 T1 RH1 T2 RH2 T3 RH3 V1 V2 V3 VR 时间,共计12个单元
     patternStr = r'^[0-9_]+[\s]+'
     patternStr += r'([0-9-.]+)[\s]+([0-9-.]+)[\s]+([0-9-.]+)[\s]+'
     patternStr += r'([0-9-.]+)[\s]+([0-9-.]+)[\s]+([0-9-.]+)[\s]+'

@@ -35,13 +35,13 @@ class Port:
             self.file = open(path, 'w')
 
     def Reader(self):
-        beginTime = 0
+        beginTime = datetime.datetime(1970,1,1)
         currentChannel = 0
         phase = PHASE_BEFORE_SEND
         received = False
         while self.alive:
             currentChannel = currentChannel%len(const.PORT_CHANEL_LIST)
-            time.sleep(0.5)
+            time.sleep(0.1)
             if phase == PHASE_BEFORE_SEND:
                 self.port.write((const.PORT_CHANEL_LIST[currentChannel] + const.END_MARK).encode('utf-8'))
                 print("write data to port %s" % const.CHANNEL_STRING[currentChannel])

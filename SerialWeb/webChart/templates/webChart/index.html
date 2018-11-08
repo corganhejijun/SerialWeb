@@ -78,22 +78,64 @@
           msg: 本次要处理的数据
           dataListAll: 所有数据
         */
+		//数据格式：1_1 T1 RH1 T2 RH2 T3 RH3 V1 V2 V3 VR
         var patt = /^([0-9_]+)\s+([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+)\[([0-9- :]+)\]/; 
         var result = patt.exec(msg);
         var date = new Date(result[12]);
         var chanel = result[1];
-        var T = parseFloat(result[2]);
-        var V1 = parseFloat(result[3]);
-        var V2 = parseFloat(result[4]);
-        var d = result[5];
-        var data4 = calculation(chanel, T, V1, V2, d, dataListAll, dataList);
+		if (chanel == "1_1"){
+            var chanel1 = "1_1";
+		    var chanel2 = "1_2";
+		    var chanel3 = "1_3";
+			}
+		else {
+			var chanel1 = "2_1";
+		    var chanel2 = "2_2";
+		    var chanel3 = "2_3";
+			}
+			
+        var T1 = parseFloat(result[2]);
+		var RH1 = parseFloat(result[3]);
+		var T2 = parseFloat(result[4]);
+		var RH2 = parseFloat(result[5]);
+		var T3 = parseFloat(result[6]);
+		var RH3 = parseFloat(result[7]);
+        var V1 = parseFloat(result[8]);
+        var V2 = parseFloat(result[9]);
+		var V3 = parseFloat(result[10]);
+        var VR = result[11];
+		
+		if (chanel == "1_1"){
+		var data41 = calculation(chanel1,T1, V1, VR, 0, dataListAll, dataList);
+	    var data42 = calculation(chanel2,T2, V2, VR, 1, dataListAll, dataList);
+		var data43 = calculation(chanel3,T3, V3, VR, 2, dataListAll, dataList);
+			}
+		else {
+		var data41 = calculation(chanel1,T1, V1, VR, 3, dataListAll, dataList);
+	    var data42 = calculation(chanel2,T2, V2, VR, 4, dataListAll, dataList);
+		var data43 = calculation(chanel3,T3, V3, VR, 5, dataListAll, dataList);
+			}		
+
+		
         var final = [];
-        final.push({chanel:chanel, data:[
-            {name: date.toString(), value: [date, T]},
+        final.push({chanel:chanel1, data:[
+            {name: date.toString(), value: [date, T1]},
             {name: date.toString(), value: [date, V1]},
+            {name: date.toString(), value: [date, VR]},
+            {name: date.toString(), value: [date, data41]}
+        ], RH:RH1});
+        final.push({chanel:chanel2, data:[
+            {name: date.toString(), value: [date, T2]},
             {name: date.toString(), value: [date, V2]},
-            {name: date.toString(), value: [date, data4]}
-        ]});
+            {name: date.toString(), value: [date, VR]},
+            {name: date.toString(), value: [date, data42]}
+        ], RH:RH2});
+        final.push({chanel:chanel3, data:[
+            {name: date.toString(), value: [date, T3]},
+            {name: date.toString(), value: [date, V3]},
+            {name: date.toString(), value: [date, VR]},
+            {name: date.toString(), value: [date, data43]}
+        ], RH:RH3});		
         // TODO::
         // if (chanel == "2_1")
         //     chanel2 = "2_2";
@@ -104,20 +146,24 @@
 
     function calculation(chanel, T, V1, V2, d, dataListAll, dataList){
         var param_table = {
-            K1: [1, 1, 1, 1, 1, 1],
+            K1: [-0.1424, -0.1, -0.15, -0.1, 1, 1],
             T1: [1, 1, 1, 1, 1, 1],
             T2: [1, 1, 1, 1, 1, 1],
-            K22: [1, 1, 1, 1, 1, 1],
-            B2: [1, 1, 1, 1, 1, 1]
+            K22: [-0.000656, -0.0006294, -0.0006352, -0.0006094, 1, 1],
+            B2: [0.28028, 0.49403, 0.2605, 0.195, 1, 1]
         }
-        var data4 = 0;
+        var data4 = null;
         var K1 = param_table.K1[d];
         var T1 = param_table.T1[d];
-        if (dataListAll.length > 1){
+		//var T1 = dataList[0].data[0].value[1];
+        //if (dataListAll.length > 1){
+		if (dataList.length > 1){
             T1 = dataList[0].data[0].value[1];
         }
-        var T2 = param_table.T2[d];
-        if (dataListAll.length >= 49){
+        //var T2 = param_table.T2[d];
+		var T2 = T;
+        //if (dataListAll.length >= 49){
+		if (dataList.length >= (3*49)){
             T2 = 0;
             for (var i = dataListAll.length - 49; i < dataListAll.length; i++){
                 T2 += dataListAll[i].data[0].value[1];
@@ -150,7 +196,10 @@
                 for (var j = 0; j < dataList[i].data.length; j++){
                     var chanel = dataList[i].data[j].chanel;
                     var date = dataList[i].data[j].data[0].value[0];
-                    result += chanel + "  " + dataList[i].data[j].data[0].value[1] + "  " + dataList[i].data[j].data[1].value[1] + "  " + dataList[i].data[j].data[2].value[1] + "  " + dataList[i].data[j].data[3].value[1]
+					// 转存数据格式：1_1 T1 V1 VR RH1
+                    result += chanel + "  " + dataList[i].data[j].data[0].value[1] + "  " + dataList[i].data[j].data[1].value[1] + "  " 
+                        + dataList[i].data[j].data[2].value[1] + "  " + dataList[i].data[j].data[3].value[1] + "  "
+                        + dataList[i].data[j].RH + "  "
                         + "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]"
                         + "\r\n";
                 }
@@ -310,6 +359,8 @@
                             }
                         }
                     }
+					if (dataList.length == 0)
+						return;
                     document.getElementById("data1").contentWindow.updateChart(dataList);
                     document.getElementById("data2").contentWindow.updateChart(dataList);
                     document.getElementById("data3").contentWindow.updateChart(dataList);
