@@ -43,7 +43,6 @@ class Port:
             if n:
                 tmp = self.port.read(n)
                 tmp = tmp.decode('utf-8')
-                print("get string %s" % tmp)
                 data1_T1, data7_V1, data8_V2 = const.readData(tmp)
                 if not data1_T1:
                     continue
