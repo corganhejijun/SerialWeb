@@ -78,10 +78,12 @@
           msg: 本次要处理的数据
           dataListAll: 所有数据
         */
-		//数据格式：1_1 T1 RH1 T2 RH2 T3 RH3 V1 V2 V3 VR
-        var patt = /^([0-9_]+)\s+([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+),([0-9-.]+)\[([0-9- :]+)\]/; 
+		//数据格式：1_1 T1,V1,V2[日期]
+        var patt = /^([0-9_]+)\s+([0-9-.]+),([0-9-.]+),([0-9-.]+)\[([0-9- :]+)\]/; 
         var result = patt.exec(msg);
-        var date = new Date(result[12]);
+        if (result == null)
+            return null;
+        var date = new Date(result[5]);
         var chanel = result[1];
 		if (chanel == "1_1"){
             var chanel1 = "1_1";
@@ -95,15 +97,15 @@
 			}
 			
         var T1 = parseFloat(result[2]);
-		var RH1 = parseFloat(result[3]);
-		var T2 = parseFloat(result[4]);
-		var RH2 = parseFloat(result[5]);
-		var T3 = parseFloat(result[6]);
-		var RH3 = parseFloat(result[7]);
-        var V1 = parseFloat(result[8]);
-        var V2 = parseFloat(result[9]);
-		var V3 = parseFloat(result[10]);
-        var VR = result[11];
+        var V1 = parseFloat(result[3]);
+        var V2 = parseFloat(result[4]);
+		var RH1 = T1;
+		var T2 = T1;
+		var RH2 = T1;
+		var T3 = T1;
+		var RH3 = T1;
+		var V3 = V1;
+        var VR = V2;
 		
 		if (chanel == "1_1"){
 		var data41 = calculation(chanel1,T1, V1, VR, 0, dataListAll, dataList);
@@ -157,13 +159,13 @@
         var T1 = param_table.T1[d];
 		//var T1 = dataList[0].data[0].value[1];
         //if (dataListAll.length > 1){
-		if (dataList.length > 1){
+		if (dataListAll.length > 1){
             T1 = dataList[0].data[0].value[1];
         }
         //var T2 = param_table.T2[d];
 		var T2 = T;
         //if (dataListAll.length >= 49){
-		if (dataList.length >= (3*49)){
+		if (dataListAll.length >= (3*49)){
             T2 = 0;
             for (var i = dataListAll.length - 49; i < dataListAll.length; i++){
                 T2 += dataListAll[i].data[0].value[1];
@@ -352,9 +354,15 @@
                         var comName = msg.substring(0, msg.indexOf(":"))
                         for (var j = 0; j < dataList.length; j++){
                             if (dataList[j].name == comName){
-                                var data = getData(dataList[j].data, msg.substring(msg.indexOf(":") + 1), dataList);
-                                for (var k = 0; k < data.length; k++)
-                                    dataList[j].data.push(data[k]);
+                                var allData = msg.substring(msg.indexOf(":") + 1);
+                                var allDataList = allData.split('\n');
+                                for (var x = 0; x < allDataList.length; x++){
+                                    var data = getData(dataList[j].data, allDataList[x], dataList);
+                                    if (data == null)
+                                        continue;
+                                    for (var k = 0; k < data.length; k++)
+                                        dataList[j].data.push(data[k]);
+                                }
                                 break;
                             }
                         }

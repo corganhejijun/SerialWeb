@@ -10,7 +10,7 @@ WAIT_FOR_RECEIVE = 1  #seconds
 PHASE_BEFORE_SEND = 0
 PHASE_AFTER_SEND = 1
 PHASE_RECEIVED = 2
-BAUD_RATE = 9600
+BAUD_RATE = 256000
 
 class Port:
     def __init__(self, port):
@@ -28,54 +28,32 @@ class Port:
         self.thread = threading.Thread(target=self.Reader)
         self.thread.setDaemon(1)
         self.thread.start()
-        path = os.path.join(os.getcwd(), "_" + self.port.name + ".txt")
+        path = os.path.join(os.getcwd(), "_" + self.port.name[-4:] + ".txt")
+        print('write file to ' + path)
         if (os.path.exists(path)):
             self.file = open(path, "a")
         else:
             self.file = open(path, 'w')
 
     def Reader(self):
-        beginTime = datetime.datetime(1970,1,1)
-        currentChannel = 0
-        phase = PHASE_BEFORE_SEND
-        received = False
         while self.alive:
-            currentChannel = currentChannel%len(const.PORT_CHANEL_LIST)
             time.sleep(0.1)
-            if phase == PHASE_BEFORE_SEND:
-                self.port.write((const.PORT_CHANEL_LIST[currentChannel] + const.END_MARK).encode('utf-8'))
-                print("write data to port %s" % const.CHANNEL_STRING[currentChannel])
-                if received:
-                    beginTime = datetime.datetime.now()
-                phase = PHASE_AFTER_SEND
-                continue
             n = self.port.inWaiting()
             data = ''
             if n:
-                phase = PHASE_BEFORE_SEND
                 tmp = self.port.read(n)
                 tmp = tmp.decode('utf-8')
                 print("get string %s" % tmp)
-                if tmp.startswith(const.PORT_CHANNEL_STRING[currentChannel]):
-                    # TODO::
-                    data1_T1, data2_RH1, data3_T2, data4_RH2, data5_T3, data6_RH3, data7_V1, data8_V2, data9_V3, data10_VR = const.readData(tmp)
-                    if not data1_T1:
-                        continue
-                    # TODO::
-                    data += const.CHANNEL_STRING[currentChannel] + "   " + str(data1_T1) + ',' + str(data2_RH1) + ',' + str(data3_T2) + ',' + str(data4_RH2) + ',' + str(data5_T3)+ ',' + str(data6_RH3)+ ',' + str(data7_V1)+ ',' + str(data8_V2)+ ',' + str(data9_V3)+ ',' + str(data10_VR)+ "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
-                    # data += tmp.decode('utf-8') + "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
-                    self.port.flushInput()
+                data1_T1, data7_V1, data8_V2 = const.readData(tmp)
+                if not data1_T1:
+                    continue
+                data += const.CHANNEL_STRING[0] + "   " 
+                data += str(data1_T1) + ',' + str(data7_V1) + ',' + str(data8_V2) 
+                data += "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
+                self.port.flushInput()
             if len(data) > 0:
-                received = True
                 self.data.append(data)
                 self.file.write(data + "\r\n")
-                currentChannel += 1
-            else:
-                received = False
-            if not received:
-                if (datetime.datetime.now() - beginTime) > datetime.timedelta(seconds=WAIT_FOR_RECEIVE):
-                    phase = PHASE_BEFORE_SEND
-                    currentChannel += 1
 
     def stop(self):
         self.alive = False
@@ -93,11 +71,14 @@ class SerialPort:
     def __init__(self):
         return
 
-    def create(self, port, baud=BAUD_RATE):
-        port = serial.Serial(port, baud, write_timeout=0)
+    def create(self, portName, baud=BAUD_RATE):
+        port = serial.Serial(portName, baud, write_timeout=0)
         port.timeout = 2
         if not port.isOpen():
             port.open()
+            print('open ' + portName + ' success')
+        else:
+            print(portName + ' is already opened')
         portObj = Port(port)
         portObj.start()
         self.portOpened.append(portObj)
