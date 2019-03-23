@@ -42,7 +42,10 @@ class Port:
             data = ''
             if n:
                 tmp = self.port.read(n)
-                tmp = tmp.decode('utf-8')
+                try:
+                    tmp = tmp.decode('utf-8')
+                except:
+                    continue
                 data1_T1, data7_V1, data8_V2 = const.readData(tmp)
                 if not data1_T1:
                     continue
