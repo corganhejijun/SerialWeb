@@ -71,6 +71,10 @@ class SerialPort:
         return
 
     def create(self, portName, baud=BAUD_RATE):
+        for p in self.portOpened:
+            if p.getName() == portName:
+                print("already opened")
+                return
         port = serial.Serial(portName, baud, write_timeout=0)
         port.timeout = 2
         if not port.isOpen():
@@ -119,6 +123,7 @@ class SerialPort:
                 item.stop()
                 item.port.close()
                 self.portOpened.remove(item)
+                print("port " + name + " closed")
                 return
 
     def read_data(self, nameList):
