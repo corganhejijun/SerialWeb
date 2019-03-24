@@ -11,6 +11,7 @@ PHASE_BEFORE_SEND = 0
 PHASE_AFTER_SEND = 1
 PHASE_RECEIVED = 2
 BAUD_RATE = 256000
+ROOT_PATH = '/home/admin1/SerialWeb'
 
 class Port:
     def __init__(self, port):
@@ -28,7 +29,7 @@ class Port:
         self.thread = threading.Thread(target=self.Reader)
         self.thread.setDaemon(1)
         self.thread.start()
-        path = os.path.join(os.getcwd(), "_" + self.port.name[-4:] + ".txt")
+        path = os.path.join(ROOT_PATH, "_" + self.port.name[-4:] + ".txt")
         print('write file to ' + path)
         if (os.path.exists(path)):
             self.file = open(path, "a")
