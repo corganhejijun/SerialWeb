@@ -37,8 +37,10 @@ class Port:
             self.file = open(path, 'w')
 
     def Reader(self):
+        lasttime = datetime.datetime.now()
+        fileData = ''
         while self.alive:
-            time.sleep(0.1)
+            time.sleep(0.01)
             n = self.port.inWaiting()
             data = ''
             if n:
@@ -54,9 +56,12 @@ class Port:
                 data += str(data1_T1) + ',' + str(data7_V1) + ',' + str(data8_V2) 
                 data += "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                 self.port.flushInput()
+                fileData += data + "\r\n"
             if len(data) > 0:
                 self.data.append(data)
-                self.file.write(data + "\r\n")
+            if (datetime.datetime.now() - lasttime).total_seconds() > 1:
+                self.file.write(fileData + "\r\n")
+                lasttime = datetime.datetime.now()
 
     def stop(self):
         self.alive = False
