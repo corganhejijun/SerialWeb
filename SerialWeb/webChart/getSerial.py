@@ -62,6 +62,7 @@ class Port:
             if (datetime.datetime.now() - lasttime).total_seconds() > 1:
                 self.file.write(fileData + "\r\n")
                 lasttime = datetime.datetime.now()
+                fileData = ""
 
     def stop(self):
         self.alive = False
