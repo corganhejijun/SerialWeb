@@ -8,504 +8,58 @@
     <link rel="stylesheet" type="text/css" href="{% static 'webChart/bootstrap.min.css' %}" /> 
     <script type="text/javascript" src="{% static 'webChart/jquery-2.2.4.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'webChart/bootstrap.min.js' %}"></script>
-    <script src="{% static 'webChart/echarts.min.js' %}"></script>
     <style type="text/css">
-    div.top {
-        position: absolute;
-        left: 30px;
-        top: 10px;
-        height: 60px;
-        padding-left: 30px;
-        padding-top: 10px;
+    div.title {
+        font-size: 30px;
+        text-align: center;
+        font-weight: 900;
+        top: 20%;
     }
-    div.chart {
-        position: absolute;
-        left: 10px;
-        right: 10px;
-        bottom: 30px;
-        top: 60px;
-        width: 90%;
+    .page {
+        text-align: center;
+        vertical-align: middle;
+        height: 200px;
+        margin: 0 0 0 0;
     }
-    html, body, iframe{
-        height: 100%;
+    .row {
+        width: 100%;
+        top: 30%;
+    }
+    .container {
+        position: fixed;
+        top: 20%;
         width: 100%;
     }
-    .myModalData {
+    html, body {
         height: 100%;
-        width: 100%;
-    }
-    div.process {
-        position: absolute;
-        right: 10px;
-        top: 10px;
-    }
-    div.data1 {
-        position: absolute;
-        height: 50%;
-        width: 50%;
-    }
-    div.data2 {
-        position: absolute;
-        height: 50%;
-        width: 50%;
-        left: 50%;
-        top: 0;
-    }
-    div.data3 {
-        position: absolute;
-        height: 50%;
-        width: 50%;
-        top: 50%;
-        left: 0;
-    }
-    div.data4 {
-        position: absolute;
-        height: 50%;
-        width: 50%;
-        left: 50%;
-        top: 50%;
-    }
-    button.btn-look-data {
-        position: absolute;
-        bottom: 0px;
-        right: 0px;
+        background-color: rgb(239, 241, 242);
     }
     </style>
     <script type="text/javascript">
-    function getData(dataList, msg, dataListAll) {
-        /*
-          dataList: 上一次的数据
-          msg: 本次要处理的数据
-          dataListAll: 所有数据
-        */
-		//数据格式：1_1 T1,V1,V2[日期]
-        var patt = /^([0-9_]+)\s+([0-9-.]+),([0-9-.]+),([0-9-.]+)\[([0-9- :]+)\]/; 
-        var result = patt.exec(msg);
-        if (result == null)
-            return null;
-        var date = new Date(result[5]);
-        var chanel = result[1];
-		if (chanel == "1_1"){
-            var chanel1 = "1_1";
-		    var chanel2 = "1_2";
-		    var chanel3 = "1_3";
-			}
-		else {
-			var chanel1 = "2_1";
-		    var chanel2 = "2_2";
-		    var chanel3 = "2_3";
-			}
-			
-        var T1 = parseFloat(result[2]);
-        var V1 = parseFloat(result[3]);
-        var V2 = parseFloat(result[4]);
-		var RH1 = T1;
-		var T2 = T1;
-		var RH2 = T1;
-		var T3 = T1;
-		var RH3 = T1;
-		var V3 = V1;
-        var VR = V2;
-		
-		if (chanel == "1_1"){
-		var data41 = calculation(chanel1,T1, V1, VR, 0, dataListAll, dataList);
-	    var data42 = calculation(chanel2,T2, V2, VR, 1, dataListAll, dataList);
-		var data43 = calculation(chanel3,T3, V3, VR, 2, dataListAll, dataList);
-			}
-		else {
-		var data41 = calculation(chanel1,T1, V1, VR, 3, dataListAll, dataList);
-	    var data42 = calculation(chanel2,T2, V2, VR, 4, dataListAll, dataList);
-		var data43 = calculation(chanel3,T3, V3, VR, 5, dataListAll, dataList);
-			}		
-
-		
-        var final = [];
-        final.push({chanel:chanel1, data:[
-            {name: date.toString(), value: [date, T1]},
-            {name: date.toString(), value: [date, V1]},
-            {name: date.toString(), value: [date, VR]},
-            {name: date.toString(), value: [date, data41]}
-        ], RH:RH1});
-        final.push({chanel:chanel2, data:[
-            {name: date.toString(), value: [date, T2]},
-            {name: date.toString(), value: [date, V2]},
-            {name: date.toString(), value: [date, VR]},
-            {name: date.toString(), value: [date, data42]}
-        ], RH:RH2});
-        final.push({chanel:chanel3, data:[
-            {name: date.toString(), value: [date, T3]},
-            {name: date.toString(), value: [date, V3]},
-            {name: date.toString(), value: [date, VR]},
-            {name: date.toString(), value: [date, data43]}
-        ], RH:RH3});		
-        // TODO::
-        // if (chanel == "2_1")
-        //     chanel2 = "2_2";
-        //result.push({chanel: chanel2, data:[]});
-        //result.push({chanel: chanel3, data:[]});
-        return final;
-    }
-
-    function calculation(chanel, T, V1, V2, d, dataListAll, dataList){
-        var param_table = {
-            K1: [-0.1424, -0.1, -0.15, -0.1, 1, 1],
-            T1: [1, 1, 1, 1, 1, 1],
-            T2: [1, 1, 1, 1, 1, 1],
-            K22: [-0.000656, -0.0006294, -0.0006352, -0.0006094, 1, 1],
-            B2: [0.28028, 0.49403, 0.2605, 0.195, 1, 1]
-        }
-        var data4 = null;
-        var K1 = param_table.K1[d];
-        var T1 = param_table.T1[d];
-		//var T1 = dataList[0].data[0].value[1];
-        //if (dataListAll.length > 1){
-		if (dataList.length > 1){
-            T1 = dataList[0].data[0].value[1];
-        }
-        //var T2 = param_table.T2[d];
-		var T2 = T;
-        //if (dataListAll.length >= 49){
-		if (dataListAll.length >= (3*49)){
-            T2 = 0;
-            for (var i = dataListAll.length - 49; i < dataListAll.length; i++){
-                T2 += dataListAll[i].data[0].value[1];
-            }
-            T2 += T;    // 第50个数
-            T2 /= 50;   // 求平均
-        }
-        var K22 = param_table.K22[d];
-        var B2 = param_table.B2[d];
-        if (dataList.length > 0){
-            for (var i = dataList.length - 1; i >= 0; i--){
-                if (dataList[i].chanel == chanel){
-                    var last_V2 = parseFloat(dataList[i].data[2].value[1]);
-                    if (V1 <= 0)
-                        data4 = V1 + (V2 - last_V2) * V1 / V2 * -1 * K1 + (T2 - T1) * (K22 * V1 + B2)
-                    else
-                        data4 = V1 + (V2 - last_V2) * V1 / V2 * K1 + (T2 - T1) * (K22 * V1 + B2)
-                }
-            }
-        }
-        return data4;
-    }
-
-    function getDataDown(button, dataList){
-        var name = button.value;
-        $("#myModalLabel")[0].innerHTML = "串口" + name + "数据";
-        for (var i = 0; i < dataList.length; i++){
-            if (dataList[i].name == name){
-                var result = "";
-                for (var j = 0; j < dataList[i].data.length; j++){
-                    var chanel = dataList[i].data[j].chanel;
-                    var date = dataList[i].data[j].data[0].value[0];
-					// 转存数据格式：1_1 T1 V1 VR RH1
-                    result += chanel + "  " + dataList[i].data[j].data[0].value[1] + "  " + dataList[i].data[j].data[1].value[1] + "  " 
-                        + dataList[i].data[j].data[2].value[1] + "  " + dataList[i].data[j].data[3].value[1] + "  "
-                        + dataList[i].data[j].RH + "  "
-                        + "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]"
-                        + "\r\n";
-                }
-                if (result.length > 0)
-                    $("#myModalData")[0].innerHTML = result;
-                else{
-                    $("#myModalLabel")[0].innerHTML = "串口" + name + "无数据";
-                    $("#myModalData")[0].innerHTML = "";
-                }
-            }
-        }
-
-    }
-
-    function applyFilter(){
-        var portName = $("#filter-select").val();
-        var checked = $("#checkbox-filter")[0].checked;
-        
-        document.getElementById("data1").contentWindow.applyFilter(portName, checked);
-        document.getElementById("data2").contentWindow.applyFilter(portName, checked);
-        document.getElementById("data3").contentWindow.applyFilter(portName, checked);
-        document.getElementById("data4").contentWindow.applyFilter(portName, checked);
-    }
-
-    function setCom(dataList, btn, opened){
-        for (var i = 0; i < dataList.length; i++){
-            if (dataList[i].name == btn.value){
-                dataList[i].opened = opened;
-                break;
-            }
-        }
-        getMsg(dataList);
-    }
-
-    function onLoadFrame(number, dataList){
-        var list = $("button.btn-danger");
-        if (list.length > 0)
-            getMsg(dataList);
-    }
-
-    function checkOpenList(dataList){
-        $.ajax({url: 'http://' + window.location.host + "/json",
-            data: {func: "checkOpen"},
-            success: function(result){
-                if (result.flag == false)
-                    return;
-                var buttonList = $("button.com");
-                var hasOpened = false;
-                for (var j = 0; j < buttonList.length; j ++){
-                    var button = buttonList[j];
-                    for (var i = 0; i < result.openList.length; i++){
-                        if (button.value == result.openList[i]){
-                            $(button).removeClass('btn-success').addClass('btn-danger');
-                            button.innerHTML = "关闭" + button.value;
-                            hasOpened = true;
-                        }
-                    }
-                }
-                for (var i = 0; i < result.occupy.length; i++){
-                    $(".top")[0].innerHTML += "<button class='btn btn-default' disabled=true>" + result.occupy[i] + "被占用</button>"
-                }
-                $('#data1').load(function(){
-                    onLoadFrame(1, dataList);
-                });
-                $('#data2').load(function(){
-                    onLoadFrame(2, dataList);
-                });
-                $('#data3').load(function(){
-                    onLoadFrame(3, dataList);
-                });
-                $('#data4').load(function(){
-                    onLoadFrame(4, dataList);
-                });
-                $("button.com").on('click', function(){
-                    var btn = $(this)[0]
-                    if ($(btn).hasClass('btn-success')){
-                        $.ajax({url: 'http://' + window.location.host + "/json",
-                            data: {func: "open", name:btn.value},
-                            success: function(result){
-                                if (result.flag == false){
-                                    alert("打开失败");
-                                    return;
-                                }
-                                btn.innerHTML = "关闭" + btn.value;
-                                $(btn).removeClass('btn-success').addClass('btn-danger');
-                                setCom(dataList, btn, true);
-                            }
-                        });
-                    }
-                    else if ($(btn).hasClass('btn-danger')){
-                        $.ajax({url: 'http://' + window.location.host + "/json",
-                            data: {func:"close", name:btn.value},
-                            success: function(result){
-                                if (result.flag == false){
-                                    alert("关闭失败");
-                                    return;
-                                }
-                                btn.innerHTML = "打开" + btn.value;
-                                $(btn).removeClass('btn-danger').addClass('btn-success');
-                                setCom(dataList, btn, false);
-                            }
-                        });
-                    }
-                });
-                $("button.download").on('click', function(){
-                    var button = $(this)[0];
-                    getDataDown(button, dataList);
-                    $('#myModal').modal();
-                });
-                $("#checkbox-filter").on('change', function(){
-                    applyFilter();
-                });
-                $("#filter-select").on("change", function(){
-                    applyFilter();
-                });
-            }
-        });
-    }
-
-    function getMsg(dataList){
-        var openedList = [];
-        for (var i = 0; i < dataList.length; i++){
-            if (dataList[i].opened)
-                openedList.push(dataList[i].name);
-        }
-        if (openedList.length == 0){
-            clearInterval(timer);
-            timer = null;
-            return;
-        }
-        if (timer != null)
-            return;
-        timer = setInterval(function(){
-            var opened = [];
-            for (var i = 0; i < dataList.length; i++){
-                if (dataList[i].opened)
-                    opened.push(dataList[i].name);
-            }
-            $.ajax({url: 'http://' + window.location.host + "/json",
-                data: {func: "read", name:opened.join(",")},
-                success: function(result){
-                    if (result.flag == false){
-                        alert("读取失败");
-                        return;
-                    }
-                    if (result.msg.length == 0)
-                        return;
-                    for (var i = 0; i < result.msg.length; i++){
-                        var msg = result.msg[i];
-                        var comName = msg.substring(0, msg.indexOf(":"))
-                        for (var j = 0; j < dataList.length; j++){
-                            if (dataList[j].name == comName){
-                                var allData = msg.substring(msg.indexOf(":") + 1);
-                                var allDataList = allData.split('\n');
-                                for (var x = 0; x < allDataList.length; x++){
-                                    var data = getData(dataList[j].data, allDataList[x], dataList);
-                                    if (data == null)
-                                        continue;
-                                    for (var k = 0; k < data.length; k++)
-                                        dataList[j].data.push(data[k]);
-                                }
-                                break;
-                            }
-                        }
-                    }
-					if (dataList.length == 0)
-						return;
-                    document.getElementById("data1").contentWindow.updateChart(dataList);
-                    document.getElementById("data2").contentWindow.updateChart(dataList);
-                    document.getElementById("data3").contentWindow.updateChart(dataList);
-                    document.getElementById("data4").contentWindow.updateChart(dataList);
-                }
-            })
-        }, 1000);
-    }       
-
-    var timer = null;
     $(document).ready(function(){
-        var dataList = [];
-        var comList = {
-        {% for item in list %} {% for port, open in item.items %}
-        '{{port}}':'{{open}}',
-        {% endfor %} {% endfor %} 
-        };
-        for (var i = 0; i < Object.keys(comList).length; i++){
-            dataList.push({'name': Object.keys(comList)[i], 'opened': (Object.values(comList)[i] == "True"), 'data':[]});
-        }
-        $('#myModal').on('show.bs.modal', function () {
-            $('.modal .modal-body').css('overflow-y', 'auto'); 
-            $('.modal .modal-body').css('height', $(window).height() * 0.7);
-        });
-        $("button.data-process").click(function(){
-            $("#myModalLabel")[0].innerHTML = "数据处理";
-            $("#processButton").show();
-            $("#div-checkbox").show();
-            $("#myModal").modal();
-        });
-        $("#myModal").on("hidden.bs.modal", function () {
-            $("#processButton").hide();
-            $("#div-checkbox").hide();
-        });
-        $("#processButton").click(function(){
-            var text = $("#myModalData").val();
-            var lines = text.split('\n');
-            var afterProcess = "";
-            var count = 0;
-            for (var i = 0; i < lines.length; i++){
-                if (lines[i].length == 0)
-                    continue;
-                if ($("#checkboxData")[0].checked){
-                    var head = $("#checkboxInput").val();
-                    if (!lines[i].startsWith(head))
-                        continue;
-                }
-                count++;
-                var patt = /^[0-9_]+\s+([0-9-.]+)\s+([0-9-.]+)\s+([0-9-.]+)\[(\d+)-(\d+)-(\d+)\s(\d+):(\d+):([0-9.]+)\]$/; 
-                var result = patt.exec(lines[i]);
-                var s = "";
-                for (var j = 1; j < result.length; j++){
-                    s += result[j] + ',';
-                }
-                afterProcess += s + "\r\n";
-            }
-            $("#dataCount")[0].innerHTML = "共" + count + "条数据";
-            $("#myModalData").val(afterProcess);
-        });
-        checkOpenList(dataList);
-        $("button.btn-look-data").click(function(){
-            var number = $(this)[0].parentNode.className.substring(4);
-            var title = ['T', 'V1', 'V2', 'V3'];
-            var data = JSON.stringify(dataList);
-            window.open("http://" + window.location.host + "/chart#" + number + "?data=" + data, title[parseInt(number)]);
-        });
     });
     </script>
 </head>
 <body>
-    <div class="top">
-        {% for item in list %} {% for port, open in item.items %}
-        <button class="com btn btn-success" value="{{port}}">打开{{port}}</button>
-        {% endfor %} {% endfor %} 
-        {% for item in list %} {% for port, open in item.items %}
-        <button class="download btn btn-primary" value="{{port}}">下载{{port}}数据</button>
-        {% endfor %} {% endfor %}
-        <label>
-            <input type="checkbox" value="" id="checkbox-filter">
-            过滤 
-        </label>
-        <select id="filter-select">
-        {% for item in list %} {% for port, open in item.items %}
-            <option>{{port}}</option>
-        {% endfor %} {% endfor %}
-        </select>
-    </div>
-    <div class="filter">
-    </div>
-    <div class="process">
-        <button class="data-process btn btn-primary">数据处理</button>
-    </div>
-    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-    <div class="chart" id="main">
-        <div class="data1">
-            <iframe src="/chart#1" id="data1"></iframe>
-            <button class="btn btn-success btn-look-data">查看大图</button>
+    <div class="container">
+        <div class="title">
+            串口查看
         </div>
-        <div class="data2">
-            <iframe src="/chart#2" id="data2"></iframe>
-            <button class="btn btn-success btn-look-data">查看大图</button>
-        </div>
-        <div class="data3">
-            <iframe src="/chart#3" id="data3"></iframe>
-            <button class="btn btn-success btn-look-data">查看大图</button>
-        </div>
-        <div class="data4">
-            <iframe src="/chart#4" id="data4"></iframe>
-            <button class="btn btn-success btn-look-data">查看大图</button>
-        </div>
-    </div>
-    <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title" id="myModalLabel"></h4>
-                </div>
-                <div class="modal-body" id="myModalBody">
-                    <textarea class="myModalData" id="myModalData"></textarea>
-                </div>
-                <div style="display: none" id="div-checkbox">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" id="checkboxData">筛选数据头
-                        </label>
-                        <input type="text" id="checkboxInput">
-                    </div>
-                    <h4 id="dataCount"></h4>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" style="display:none" id="processButton">处理</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
+        <p></p>
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-4">
+                <a href="/onePage" class="thumbnail page">
+                    <img src="{% static 'webChart/curve.png' %}" alt="onePage">
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/fourPage" class="thumbnail page">
+                    <img src="{% static 'webChart/curve.png' %}" alt="onePage" style="position:absolute; top: 3%; left: 3%; width: 45%; height: 45%;">
+                    <img src="{% static 'webChart/curve.png' %}" alt="onePage" style="position:absolute; top: 50%; left: 3%; width: 45%; height: 45%;">
+                    <img src="{% static 'webChart/curve.png' %}" alt="onePage" style="position:absolute; top: 3%; left:50%; width: 45%; height: 45%;">
+                    <img src="{% static 'webChart/curve.png' %}" alt="onePage" style="position:absolute; top:50%; left:50%; width: 45%; height: 45%;">
+                </a>
             </div>
         </div>
     </div>

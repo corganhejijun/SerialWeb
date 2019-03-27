@@ -20,6 +20,12 @@ def getOpenList():
 def index(request):
     return render(request, 'webChart/index.html', {'list': getOpenList()})
 
+def onePage(request):
+    return render(request, 'webChart/onePage.html', {'list': getOpenList()})
+
+def fourPage(request):
+    return render(request, 'webChart/fourPage.html', {'list': getOpenList()})
+
 def chart(request):
     return render(request, 'webChart/chart.html')
 

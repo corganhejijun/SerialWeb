@@ -11,7 +11,8 @@ PHASE_BEFORE_SEND = 0
 PHASE_AFTER_SEND = 1
 PHASE_RECEIVED = 2
 BAUD_RATE = 256000
-ROOT_PATH = '/home/admin1/SerialWeb'
+#ROOT_PATH = '/home/admin1/SerialWeb'
+ROOT_PATH = os.path.join(os.path.split(os.path.realpath(__file__))[0], '..')
 
 class Port:
     def __init__(self, port):
