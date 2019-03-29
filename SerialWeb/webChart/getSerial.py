@@ -53,8 +53,12 @@ class Port:
                 data1_T1, data7_V1, data8_V2 = const.readData(tmp)
                 if not data1_T1:
                     continue
-                data += const.CHANNEL_STRING[0] + "   " 
-                data += str(data1_T1) + ',' + str(data7_V1) + ',' + str(data8_V2) 
+                if not data7_V1:
+                    data += const.CHANNEL_STRING[0] + "   "
+                    data += str(data1_T1)
+                else:
+                    data += const.CHANNEL_STRING[0] + "   " 
+                    data += str(data1_T1) + ',' + str(data7_V1) + ',' + str(data8_V2) 
                 data += "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
                 self.port.flushInput()
                 fileData += data + "\r\n"
@@ -152,5 +156,5 @@ class SerialPort:
         return message
 
     def getPortList(self):
-	    self.port_list = list(serial.tools.list_ports.comports())
-	    return self.port_list
+        self.port_list = list(serial.tools.list_ports.comports())
+        return self.port_list

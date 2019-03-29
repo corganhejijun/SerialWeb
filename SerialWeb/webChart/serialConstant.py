@@ -14,8 +14,13 @@ def readData(tmp):
     pattern = re.compile(patternStr)
     data = pattern.match(tmp)
     if not data:
-        print("get error msg %s" % tmp)
-        return None, None, None
+        patternStr2 = r'^[0-9_]+[\s]+([0-9-.]+)'
+        pattern = re.compile(patternStr2)
+        data = pattern.match(tmp)
+        if not data:
+            print("get error msg %s" % tmp)
+            return None, None, None
+        return float(data.group(1)), None, None
     # T1
     data1_T1 = float(data.group(1))
     # V1,V2
