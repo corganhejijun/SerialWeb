@@ -40,8 +40,9 @@ class Port:
     def Reader(self):
         lasttime = datetime.datetime.now()
         fileData = ''
+        oldStr = ''
+        count = 0
         while self.alive:
-            time.sleep(0.01)
             n = self.port.inWaiting()
             data = ''
             if n:
@@ -50,24 +51,35 @@ class Port:
                     tmp = tmp.decode('utf-8')
                 except:
                     continue
-                data1_T1, data7_V1, data8_V2 = const.readData(tmp)
-                if not data1_T1:
+                if len(tmp) == 0:
                     continue
-                if not data7_V1:
-                    data += const.CHANNEL_STRING[0] + "   "
-                    data += str(data1_T1)
-                else:
-                    data += const.CHANNEL_STRING[0] + "   " 
-                    data += str(data1_T1) + ',' + str(data7_V1) + ',' + str(data8_V2) 
-                data += "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
+                oldStr = oldStr + tmp
+                count += 1
                 self.port.flushInput()
-                fileData += data + "\r\n"
-            if len(data) > 0:
-                self.data.append(data)
-            if (datetime.datetime.now() - lasttime).total_seconds() > 1:
-                self.file.write(fileData + "\r\n")
-                lasttime = datetime.datetime.now()
-                fileData = ""
+            if not n or count > 20:
+                count = 0
+                strList = oldStr.split('\r\n')
+                if len(strList) == 0:
+                    continue
+                oldStr = strList.pop()
+                for item in strList:
+                    if (len(item) == 0):
+                        continue
+                    data1_T1, data7_V1, data8_V2 = const.readData(item)
+                    if not data7_V1:
+                        data += const.CHANNEL_STRING[0] + "   "
+                        data += str(data1_T1)
+                    else:
+                        data += const.CHANNEL_STRING[0] + "   " 
+                        data += str(data1_T1) + ',' + str(data7_V1) + ',' + str(data8_V2) 
+                    data += "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
+                    fileData += data + "\r\n"
+                if len(data) > 0:
+                    self.data.append(data)
+                if (datetime.datetime.now() - lasttime).total_seconds() > 1:
+                    self.file.write(fileData + "\r\n")
+                    lasttime = datetime.datetime.now()
+                    fileData = ""
 
     def stop(self):
         self.alive = False
