@@ -124,7 +124,10 @@
         if (ymax != null)
             max = ymax;
         chart.setOption({
-            series: option.data,
+            series: [{
+                data: option.data,
+                sampling: 'average'
+            }],
             legend: {
                 data: option.legend
             },
