@@ -72,7 +72,7 @@ class Port:
                     else:
                         data += const.CHANNEL_STRING[0] + "   " 
                         data += str(data1_T1) + ',' + str(data7_V1) + ',' + str(data8_V2) 
-                    data += "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
+                    data += "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + "]"
                     fileData += data + "\r\n"
                 if len(data) > 0:
                     self.data.append(data)

@@ -58,7 +58,7 @@
           dataListAll: 所有数据
         */
         //数据格式：1_1 T1[日期]
-        var patt = /^([0-9_]+)\s+([0-9-.]+)\[([0-9- :]+)\]/; 
+        var patt = /^([0-9_]+)\s+([0-9-.]+)\[([0-9- :.]+)\]/; 
         var result = patt.exec(msg);
         if (result == null)
             return null;
