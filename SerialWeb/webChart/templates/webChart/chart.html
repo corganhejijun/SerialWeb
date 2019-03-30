@@ -59,7 +59,7 @@
                 }
                 if (chanel == -1){
                     chanel = chanelList.length;
-                    chanelList.push({chanel: dataList[i].data[j].chanel, second: -1, average: 0, time, data:[]});
+                    chanelList.push({chanel: dataList[i].data[j].chanel, second: -1, average: 0, time:null, data:[]});
                 }
                 if (chanelList[chanel].second == -1){
                     chanelList[chanel].time = dataList[i].data[j].data[dataNum].value[0];
