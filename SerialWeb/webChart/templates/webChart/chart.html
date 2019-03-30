@@ -91,7 +91,6 @@
                 var last = chanelList[j].data;
                 last = last[last.length - 1].value;
                 markpoint.push({
-                    name: '固定 x 像素位置',
                     yAxis: last[1],
                     xAxis: last[0],
                     value: last[1]
@@ -101,6 +100,7 @@
                     name: name,
                     type: 'line',
                     showSymbol: false,
+                    sampling: 'average',
                     markPoint: {
                         label:{
                             show: true
@@ -124,10 +124,7 @@
         if (ymax != null)
             max = ymax;
         chart.setOption({
-            series: [{
-                data: option.data,
-                sampling: 'average'
-            }],
+            series: option.data,
             legend: {
                 data: option.legend
             },
