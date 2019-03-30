@@ -263,9 +263,9 @@
                     var yMax = null;
                     var yMin = null;
                     if ($("#yMin").val().length > 0)
-                        yMin = parseInt($("#yMin").val());
+                        yMin = parseFloat($("#yMin").val());
                     if ($("#yMax").val().length > 0)
-                        yMax = parseInt($("#yMax").val());
+                        yMax = parseFloat($("#yMax").val());
                     document.getElementById("data1").contentWindow.updateChart(dataList, yMin, yMax);
                 }
             })
