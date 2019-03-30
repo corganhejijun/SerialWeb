@@ -49,11 +49,7 @@
         var max = null;
         for (var i = 0; i < dataList.length; i++){
             var chanelList = [];
-            var step = 1;
-            if (dataList[i].data.length > 100) {
-                step = Math.ceil(dataList[i].data.length / 100);
-            }
-            for (var j = 0; j < dataList[i].data.length; j += step){
+            for (var j = 0; j < dataList[i].data.length; j++){
                 var chanel = -1;
                 for (var k = 0; k < chanelList.length; k++){
                     if (chanelList[k].chanel == dataList[i].data[j].chanel){
@@ -63,10 +59,20 @@
                 }
                 if (chanel == -1){
                     chanel = chanelList.length;
-                    chanelList.push({chanel: dataList[i].data[j].chanel, data:[]});
+                    chanelList.push({chanel: dataList[i].data[j].chanel, second: -1, average: 0, time, data:[]});
+                }
+                if (chanelList[chanel].second == -1){
+                    chanelList[chanel].time = dataList[i].data[j].data[dataNum].value[0];
+                    chanelList[chanel].second = dataList[i].data[j].data[dataNum].value[0].getSeconds();
+                    chanelList[chanel].average = dataList[i].data[j].data[dataNum].value[1];
+                    continue
+                }
+                else if (chanelList[chanel].second == dataList[i].data[j].data[dataNum].value[0].getSeconds()){
+                    chanelList[chanel].average = (chanelList[chanel].average + dataList[i].data[j].data[dataNum].value[1]) / 2;
+                    continue
                 }
                 if (dataList[i].data[j].data[dataNum].value[1] != null)
-                    chanelList[chanel].data.push(dataList[i].data[j].data[dataNum]);
+                    chanelList[chanel].data.push({value:[chanelList[chanel].time, chanelList[chanel].average]});
                 
                 if (chart.getOption().legend.length > 0){
                     var legendList = chart.getOption().legend[0];
@@ -82,6 +88,9 @@
                         }
                     }
                 }
+                chanelList[chanel].time = dataList[i].data[j].data[dataNum].value[0];
+                chanelList[chanel].second = dataList[i].data[j].data[dataNum].value[0].getSeconds()
+                chanelList[chanel].average = dataList[i].data[j].data[dataNum].value[1];
             }
             for (var j = 0; j < chanelList.length; j++){
                 if (chanelList[j].data.length == 0)
