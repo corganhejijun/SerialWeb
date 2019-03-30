@@ -39,6 +39,13 @@
         right: 10px;
         top: 10px;
     }
+    div.y-range {
+        position: absolute;
+        right: 200px;
+        top: 10px;
+        width: 200px;
+        display: flex;
+    }
     div.data1 {
         position: absolute;
         height: 100%;
@@ -253,7 +260,13 @@
                     }
                     if (dataList.length == 0)
                         return;
-                    document.getElementById("data1").contentWindow.updateChart(dataList);
+                    var yMax = null;
+                    var yMin = null;
+                    if ($("#yMin").length > 0)
+                        yMin = parseInt($("#yMin"));
+                    if ($("#yMax").length > 0)
+                        yMax = parseInt($("#yMax"));
+                    document.getElementById("data1").contentWindow.updateChart(dataList, yMin, yMax);
                 }
             })
         }, 1000);
@@ -337,7 +350,9 @@
         {% endfor %} {% endfor %}
         </select>
     </div>
-    <div class="filter">
+    <div class="y-range">
+        <input class="form-control" placeholder="max value" id="yMax">
+        <input class="form-control" placeholder="min value" id="yMin">
     </div>
     <div class="process">
         <button class="data-process btn btn-primary">数据处理</button>
