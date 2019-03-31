@@ -251,8 +251,14 @@
                                     var data = getData(dataList[j].data, allDataList[x], dataList);
                                     if (data == null)
                                         continue;
-                                    for (var k = 0; k < data.length; k++)
+                                    for (var k = 0; k < data.length; k++){
                                         dataList[j].data.push(data[k]);
+                                        var time = dataList[j].data[0].data[0].value[0];
+                                        var time2 = data[k].data[0].value[0];
+                                        if (time2.getTime() - time.getTime() > 30 * 60 * 1000){ // 30分钟
+                                            dataList[j].data.shift();
+                                        }
+                                    }
                                 }
                                 break;
                             }

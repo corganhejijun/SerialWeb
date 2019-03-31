@@ -71,18 +71,18 @@
                     chanelList[chanel].average = (chanelList[chanel].average + dataList[i].data[j].data[dataNum].value[1]) / 2;
                     continue
                 }
-                if (dataList[i].data[j].data[dataNum].value[1] != null)
+                if (dataList[i].data[j].data[dataNum].value[1] != null){
                     chanelList[chanel].data.push({value:[chanelList[chanel].time, chanelList[chanel].average]});
-                    if (chanelList[chanel].data.length > 100){
+                    if (chanelList[chanel].data.length > 100){  // 图中最多显示100个点
                         chanelList[chanel].data.shift();
                     }
-                
+                }
                 if (chart.getOption().legend.length > 0){
                     var legendList = chart.getOption().legend[0];
                     for (var k = 0; k < legendList.data.length; k++){
                         if (legendList.selected[legendList.data[k]] != false && legendList.data[k] == "串口:" + dataList[i].name + " 通道:" + chanelList[chanel].chanel){
-                            var value = parseFloat(dataList[i].data[j].data[dataNum].value[1])
-                            if (!isNaN(value)){
+                            for (var x = 0; x < chanelList[chanel].data.length; x++){
+                                var value = chanelList[chanel].data[x].value[1];
                                 if (min == null || min > value)
                                     min = value
                                 if (max == null || max < value)
