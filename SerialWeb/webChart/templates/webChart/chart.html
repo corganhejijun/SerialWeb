@@ -73,6 +73,9 @@
                 }
                 if (dataList[i].data[j].data[dataNum].value[1] != null)
                     chanelList[chanel].data.push({value:[chanelList[chanel].time, chanelList[chanel].average]});
+                    if (chanelList[chanel].data.length > 100){
+                        chanelList[chanel].data.shift();
+                    }
                 
                 if (chart.getOption().legend.length > 0){
                     var legendList = chart.getOption().legend[0];
