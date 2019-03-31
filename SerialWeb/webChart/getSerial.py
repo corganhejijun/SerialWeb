@@ -46,8 +46,8 @@ class Port:
             n = self.port.inWaiting()
             data = ''
             if n:
-                tmp = self.port.read(n)
                 try:
+                    tmp = self.port.read(n)
                     tmp = tmp.decode('utf-8')
                 except:
                     continue
