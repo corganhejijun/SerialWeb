@@ -1,94 +1,9 @@
+# -*- coding: UTF-8 -*-
 import serial
 import time
-import serial.tools.list_ports
-import threading
-import datetime
-import os
+import serial.tools.list_ports as list_ports
 from . import serialConstant as const
-
-WAIT_FOR_RECEIVE = 1  #seconds
-PHASE_BEFORE_SEND = 0
-PHASE_AFTER_SEND = 1
-PHASE_RECEIVED = 2
-BAUD_RATE = 256000
-#ROOT_PATH = '/home/admin1/SerialWeb'
-ROOT_PATH = os.path.join(os.path.split(os.path.realpath(__file__))[0], '..')
-
-class Port:
-    def __init__(self, port):
-        self.alive = False
-        self.waitEnd = None
-        self.port = port
-        self.data = []
-        self.thread = None
-        self.file = None
-    
-    def start(self):
-        self.alive = True
-        self.waitEnd = threading.Event()
-        self.thread = None
-        self.thread = threading.Thread(target=self.Reader)
-        self.thread.setDaemon(1)
-        self.thread.start()
-        path = os.path.join(ROOT_PATH, "_" + self.port.name[-4:] + ".txt")
-        print('write file to ' + path)
-        if (os.path.exists(path)):
-            self.file = open(path, "a")
-        else:
-            self.file = open(path, 'w')
-
-    def Reader(self):
-        lasttime = datetime.datetime.now()
-        fileData = ''
-        oldStr = ''
-        count = 0
-        while self.alive:
-            n = self.port.inWaiting()
-            data = ''
-            if n:
-                try:
-                    tmp = self.port.read(n)
-                    tmp = tmp.decode('utf-8')
-                except:
-                    continue
-                if len(tmp) == 0:
-                    continue
-                oldStr = oldStr + tmp
-                count += 1
-                self.port.flushInput()
-            if not n or count > 20:
-                count = 0
-                strList = oldStr.split('\r\n')
-                if len(strList) == 0:
-                    continue
-                oldStr = strList.pop()
-                for item in strList:
-                    if (len(item) == 0):
-                        continue
-                    data1_T1, data7_V1, data8_V2 = const.readData(item)
-                    if not data7_V1:
-                        data += const.CHANNEL_STRING[0] + "   "
-                        data += str(data1_T1)
-                    else:
-                        data += const.CHANNEL_STRING[0] + "   " 
-                        data += str(data1_T1) + ',' + str(data7_V1) + ',' + str(data8_V2) 
-                    data += "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + "]"
-                    fileData += data + "\r\n"
-                if len(data) > 0:
-                    self.data.append(data)
-                if (datetime.datetime.now() - lasttime).total_seconds() > 1:
-                    self.file.write(fileData + "\r\n")
-                    lasttime = datetime.datetime.now()
-                    fileData = ""
-
-    def stop(self):
-        self.alive = False
-        self.thread.join()
-        self.file.close()
-
-    def getName(self):
-        return self.port.name
-
+from . import Port
 
 class SerialPort:
     port_list = None
@@ -97,7 +12,7 @@ class SerialPort:
     def __init__(self):
         return
 
-    def create(self, portName, baud=BAUD_RATE):
+    def create(self, portName, baud=const.BAUD_RATE):
         for p in self.portOpened:
             if p.getName() == portName:
                 print("already opened")
@@ -108,8 +23,10 @@ class SerialPort:
             port.open()
             print('open ' + portName + ' success')
         else:
+            port.close()
+            port.open()
             print(portName + ' is already opened')
-        portObj = Port(port)
+        portObj = Port.Port(port)
         portObj.start()
         self.portOpened.append(portObj)
 
@@ -117,7 +34,7 @@ class SerialPort:
         try:
             for port in self.port_list:
                 if name == port[0]:
-                    portObj = serial.Serial(name, BAUD_RATE)
+                    portObj = serial.Serial(name, const.BAUD_RATE)
                     return portObj.isOpen()
         except:
             pass
@@ -168,5 +85,5 @@ class SerialPort:
         return message
 
     def getPortList(self):
-        self.port_list = list(serial.tools.list_ports.comports())
+        self.port_list = list(list_ports.comports())
         return self.port_list

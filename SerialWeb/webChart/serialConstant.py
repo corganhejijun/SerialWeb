@@ -1,32 +1,46 @@
-import ctypes
-import re
+# -*- coding: UTF-8 -*-
+import os
+import datetime
+from . import models
 
-PORT_CHANEL_LIST = ['\x01\x10', '\x02\x20']
-#PORT_CHANEL_LIST_X = [[0x01, 0x11], [0x01, 0x12], [0x01, 0x13], \
-#                      [0x02, 0x21], [0x02, 0x22], [0x02, 0x03]]
-CHANNEL_STRING = ['1_1', '2_1']
-PORT_CHANNEL_STRING = ['1_1', '2_1']
-END_MARK = '\x0D\x0A'
+BAUD_RATE = 9600
+ROOT_PATH = os.path.join(os.path.split(os.path.realpath(__file__))[0], '..')
+SEND_INTERVAL = 1 # second
+
+SEND_LIST = [b'\x01\x11', b'\x01\x12', b'\x02\x11', b'\x02\x12']
+SEND_END = b'\x0D\x0A'
+CHANNEL_NAME = ['1_1', '1_2', '1_2', '2_2']
 
 def readData(tmp):
-    # TODO::数据格式：1_1 T1 V1 V2
-    patternStr = r'^[0-9_]+[\s]+([0-9-.]+)[\s]+([0-9-.]+)[\s]+([0-9-.]+)'
-    pattern = re.compile(patternStr)
-    data = pattern.match(tmp)
-    if not data:
-        patternStr2 = r'^[0-9_]+[\s]+([0-9-.]+)'
-        pattern = re.compile(patternStr2)
-        data = pattern.match(tmp)
-        if not data:
-            print("get error msg %s" % tmp)
-            return None, None, None
-        return float(data.group(1)), None, None
-    # T1
-    data1_T1 = float(data.group(1))
-    # V1,V2
-    data7_V1 = float(data.group(2))
-    data8_V2 = float(data.group(3))
-    return data1_T1, data7_V1, data8_V2
+    # TODO::数据格式：1_1 T1 V1 V2 ...
+    strList = tmp.split(' ')
+    dataList = []
+    for i, _ in enumerate(strList):
+        if i == 0:
+            channelName = strList[i]
+        else:
+            d = None
+            try:
+                d = float(strList[i])
+            except:
+                d = None
+            dataList.append(d)
+    return channelName, dataList
+
+def processLine(line):
+    channelName, dataList = readData(line)
+    data = channelName + ' '
+    dataStr = ''
+    for i, item in enumerate(dataList):
+        dataStr += str(item)
+        if i < len(dataList) - 1:
+            dataStr += ','
+    data += dataStr
+    time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+    data += "[" + time + "]"
+    portData = models.PortData(name=channelName, time=time, strValue=dataStr)
+    portData.save()
+    return data, channelName
 
 ## deprecated
 #def hex2Double(s):
