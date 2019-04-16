@@ -1,0 +1,10 @@
+[Unit]
+Description=start SerialWeb
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /home/admin1/SerialWeb/SerialWeb/manage.py runserver 0.0.0.0:8000
+User=admin1
+
+[Install]
+WantedBy=multi-user.target
