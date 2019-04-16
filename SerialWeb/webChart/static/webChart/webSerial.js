@@ -37,7 +37,8 @@ function setPortButton(result, serialData){
         var btn = $(this);
         if (btn.hasClass('btn-success')){
             $.ajax({url: 'http://' + window.location.host + "/json",
-                data: {func: "open", name:btn.val()},
+                async : false,
+                data: {func: "open", name:btn.val(), baud:$('#baudrate').val()},
                 success: function(result){
                     if (result.flag == false){
                         alert("打开失败");
@@ -51,6 +52,7 @@ function setPortButton(result, serialData){
         }
         else if (btn.hasClass('btn-danger')){
             $.ajax({url: 'http://' + window.location.host + "/json",
+                async : false,
                 data: {func:"close", name:btn.val()},
                 success: function(result){
                     if (result.flag == false){
@@ -69,6 +71,7 @@ function setPortButton(result, serialData){
 function checkPortList(serialData, downloadFormat){
     $.ajax({url: 'http://' + window.location.host + "/json",
         data: {func: "checkOpen"},
+        async : false,
         success: function(result){
             if (result.flag == false)
                 return;
@@ -165,6 +168,7 @@ SerialData.prototype.getSerialData = function(){
         }
         $.ajax({url: 'http://' + window.location.host + "/json",
             data: {func: "read", name:opened.join(",")},
+            async : false,
             success: function(result){
                 if (result.flag == false){
                     alert("读取失败");

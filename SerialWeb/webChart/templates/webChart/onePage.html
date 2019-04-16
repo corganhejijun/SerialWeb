@@ -34,48 +34,6 @@
     }
     </style>
     <script type="text/javascript">
-    function onGetData(dataList, msg, dataListAll) {
-        /*
-          dataList: 上一次的数据
-          msg: 本次要处理的数据
-          dataListAll: 所有数据
-        */
-        //数据格式：1_1 T1[日期]
-        var patt = /^([0-9_]+)\s+([0-9-.]+)\[([0-9- :.]+)\]/; 
-        var result = patt.exec(msg);
-        if (result == null)
-            return null;
-        var date = new Date(result[3]);
-        var chanel = result[1];
-        if (chanel == "1_1") {
-            var chanel1 = "1_1";
-            var chanel2 = "1_2";
-            var chanel3 = "1_3";
-        } else {
-            var chanel1 = "2_1";
-            var chanel2 = "2_2";
-            var chanel3 = "2_3";
-        }
-            
-        var T1 = parseFloat(result[2]);
-        
-        var final = [];
-        final.push({chanel:chanel1, data:[
-            {name: date.toString(), value: [date, T1]}
-        ]});
-        return final;
-    }
-    
-    function updateChart(dataList){
-        var yMax = null;
-        var yMin = null;
-        if ($("#yMin").val().length > 0)
-            yMin = parseFloat($("#yMin").val());
-        if ($("#yMax").val().length > 0)
-            yMax = parseFloat($("#yMax").val());
-        document.getElementById("data1").contentWindow.updateChart(dataList, yMin, yMax);
-    }
-
     function setChartTitle(onFrameLoad){
         document.getElementById("data1").onload = function() {
             var legends = ['T1'];
@@ -92,8 +50,43 @@
             {% endfor %} {% endfor %} 
         ];
         for (var i = 0; i < comList.length; i++){
-            dataList.push({name: comList[i].name, opened: comList[i].value == "True", data:[]});
+            dataList.push({name: comList[i].name, opened: comList[i].value == "True", data:[
+                {name:'T', data:[]}
+            ]});
         }
+        function onGetData(msg, portIndex) {
+            //数据格式：T1[日期]
+            var patt = /^([0-9-.]+)\[([0-9- :.]+)\]/; 
+            var result = patt.exec(msg);
+            if (result == null)
+                return null;
+            var date = new Date(result[2]);
+            var T1 = parseFloat(result[1]);
+            dataList[portIndex].data[0].data.push({name: date.toString(), value: [date, parseFloat(T1)]});
+        }
+        
+        function updateChart(){
+            if (dataList.length == 0)
+                return;
+            var data1List = [];
+            for (var i = 0; i < dataList.length; i++){
+                if (dataList[i].opened == false)
+                    continue;
+                var data = [];
+                data.push({name:'T', data:dataList[i].data[0]});
+                data1List.push({name:dataList[i].name, data:data});
+            }
+            var yMax = null;
+            var yMin = null;
+            if ($("#yMin").val().length > 0)
+                yMin = parseFloat($("#yMin").val());
+            if ($("#yMax").val().length > 0)
+                yMax = parseFloat($("#yMax").val());
+            document.getElementById("data1").contentWindow.updateChart(data1List, yMin, yMax);
+        }
+
+        var serialData = new SerialData(updateChart, onGetData, dataList);
+
         $("button.data-process").click(function(){
             $("#myModalLabel")[0].innerHTML = "数据处理";
             $("#processButton").show();
@@ -101,27 +94,30 @@
             $("#myModal").modal();
         });
         setChartTitle(function(){
-            getSerialData(dataList, updateChart, onGetData);
+            serialData.getSerialData();
         });
 
-        function downloadFormat(data){
+        function downloadFormat(portName){
             var result = "";
             for (var i = 0; i < dataList.length; i++){
                 if (dataList[i].name != portName)
                     continue;
                 for (var j = 0; j < dataList[i].data.length; j++){
-                    var data = dataList[i].data[j];
-                    var chanel = data.chanel;
-                    var date = data.data[0].value[0];
-                    // 转存数据格式：1_1 T1
-                    result += chanel + "  " + data.data[0].value[1]
-                        + "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " 
-                        + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]" + "\r\n";
+                    var valueName = dataList[i].data[j].name;
+                    var data = dataList[i].data[j]
+                    if (data.data.length == 0)
+                        continue;
+                    for (var k = 0; k < data.data.length; k++){
+                        var date = data.data[k].value[0];
+                        result +=  portName + " " + valueName + ":" + data.data[k].value[1]
+                            + "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " 
+                            + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]" + "\r\n";
+                    }
                 }
             }
             return result;
         }
-        checkPortList(updateChart, downloadFormat, getData);
+        checkPortList(serialData, downloadFormat);
         $("#checkbox-filter").on('change', function(){
             applyFilter($("iframe[id^='data']"));
         });
@@ -154,6 +150,10 @@
             <option>{{port}}</option>
         {% endfor %} {% endfor %}
         </select>
+        <label>
+            波特率
+            <input type="input" value="256000" id="baudrate">
+        </label>
     </div>
     <div class="y-range">
         <input class="form-control" placeholder="max value" id="yMax" style="font-size:20px">

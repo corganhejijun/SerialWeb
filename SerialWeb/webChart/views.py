@@ -34,7 +34,8 @@ def jsonData(request):
     func = request.GET['func']
     if func == "open":
         name = request.GET['name']
-        serialPort.create(name)
+        baudrate = request.GET['baud']
+        serialPort.create(name, baudrate)
         return JsonResponse({'flag':True})
     elif func == "close":
         name = request.GET['name']

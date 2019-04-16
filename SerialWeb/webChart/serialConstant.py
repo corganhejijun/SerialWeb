@@ -31,6 +31,10 @@ def processLine(line):
     channelName, dataList = readData(line)
     data = channelName + ' '
     dataStr = ''
+    if len(dataList) == 0:
+        # 单通道的情况
+        data = channelName
+        channelName = ''
     for i, item in enumerate(dataList):
         dataStr += str(item)
         if i < len(dataList) - 1:
