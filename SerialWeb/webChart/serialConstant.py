@@ -5,11 +5,11 @@ from . import models
 
 BAUD_RATE = 9600
 ROOT_PATH = os.path.join(os.path.split(os.path.realpath(__file__))[0], '..')
-SEND_INTERVAL = 1 # second
+SEND_INTERVAL = 2 # second
 
 SEND_LIST = [b'\x01\x11', b'\x01\x12', b'\x02\x11', b'\x02\x12']
 SEND_END = b'\x0D\x0A'
-CHANNEL_NAME = ['1_1', '1_2', '1_2', '2_2']
+CHANNEL_NAME = ['1_1', '2_1', '1_2', '2_2']
 
 def readData(tmp):
     # TODO::数据格式：1_1 T1 V1 V2 ...

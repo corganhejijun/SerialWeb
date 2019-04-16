@@ -1,1 +1,4 @@
 *.pyc
+/SerialWeb/db.sqlite3
+/SerialWeb/webChart/migrations/0*
+_*.txt

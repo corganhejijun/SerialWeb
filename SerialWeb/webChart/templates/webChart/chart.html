@@ -21,74 +21,68 @@
     }
     </style>
     <script type="text/javascript">
-    function getDataOption(chart, dataList){
+    function getDataOption(dataList){
         var dataNum = parseInt(window.location.hash.substring(1, 2)) - 1;
-        var data = [];
-        var legend = [];
+        var chartData = [];
         var min = null;
         var max = null;
+        var channelList = [];
+        var legend = [];
         for (var i = 0; i < dataList.length; i++){
-            var chanelList = [];
+            var portName = dataList[i].name;
             for (var j = 0; j < dataList[i].data.length; j++){
-                var chanel = -1;
-                for (var k = 0; k < chanelList.length; k++){
-                    if (chanelList[k].chanel == dataList[i].data[j].chanel){
-                        chanel = k;
-                        break;
+                var valueName = dataList[i].data[j].name;
+                var valueData = dataList[i].data[j].data;
+                var channel = {channel: valueName, second: -1, average: 0, time:null, data:[]};
+                for (var k = 0; k < valueData.data.length; k++){
+                    if (channel.second == -1){
+                        channel.time = valueData.data[k].value[0];
+                        channel.second = valueData.data[k].value[0].getSeconds();
+                        channel.average = valueData.data[k].value[1];
+                        continue
+                    } else if (channel.second == valueData.data[k].value[0].getSeconds()){
+                        channel.average = (channel.average + valueData.data[k].value[1]) / 2;
+                        continue
                     }
-                }
-                if (chanel == -1){
-                    chanel = chanelList.length;
-                    chanelList.push({chanel: dataList[i].data[j].chanel, second: -1, average: 0, time:null, data:[]});
-                }
-                if (chanelList[chanel].second == -1){
-                    chanelList[chanel].time = dataList[i].data[j].data[dataNum].value[0];
-                    chanelList[chanel].second = dataList[i].data[j].data[dataNum].value[0].getSeconds();
-                    chanelList[chanel].average = dataList[i].data[j].data[dataNum].value[1];
-                    continue
-                }
-                else if (chanelList[chanel].second == dataList[i].data[j].data[dataNum].value[0].getSeconds()){
-                    chanelList[chanel].average = (chanelList[chanel].average + dataList[i].data[j].data[dataNum].value[1]) / 2;
-                    continue
-                }
-                if (dataList[i].data[j].data[dataNum].value[1] != null){
-                    chanelList[chanel].data.push({value:[chanelList[chanel].time, chanelList[chanel].average]});
-                    if (chanelList[chanel].data.length > 100){  // 图中最多显示100个点
-                        chanelList[chanel].data.shift();
+                    channel.data.push({value:[channel.time, channel.average]});
+                    if (channel.data.length > 100){  // 图中最多显示100个点
+                        channel.data.shift();
                     }
-                }
-                if (chart.getOption().legend.length > 0){
-                    var legendList = chart.getOption().legend[0];
-                    for (var k = 0; k < legendList.data.length; k++){
-                        if (legendList.selected[legendList.data[k]] != false && legendList.data[k] == "串口:" + dataList[i].name + " 通道:" + chanelList[chanel].chanel){
-                            for (var x = 0; x < chanelList[chanel].data.length; x++){
-                                var value = chanelList[chanel].data[x].value[1];
-                                if (min == null || min > value)
-                                    min = value
-                                if (max == null || max < value)
-                                    max = value
+                    if (chart.getOption().legend.length > 0){
+                        var legendList = chart.getOption().legend[0];
+                        for (var y = 0; y < legendList.data.length; y++){
+                            if (legendList.selected[legendList.data[y]] != false 
+                                    && legendList.data[y] == "串口" + portName + ":" + valueName){
+                                for (var x = 0; x < channel.data.length; x++){
+                                    var value = channel.data[x].value[1];
+                                    if (min == null || min > value)
+                                        min = value
+                                    if (max == null || max < value)
+                                        max = value
+                                }
                             }
                         }
                     }
+                    channel.time = valueData.data[k].value[0];
+                    channel.second = valueData.data[k].value[0].getSeconds()
+                    channel.average = valueData.data[k].value[1];
                 }
-                chanelList[chanel].time = dataList[i].data[j].data[dataNum].value[0];
-                chanelList[chanel].second = dataList[i].data[j].data[dataNum].value[0].getSeconds()
-                chanelList[chanel].average = dataList[i].data[j].data[dataNum].value[1];
+                channelList.push(channel);
             }
-            for (var j = 0; j < chanelList.length; j++){
-                if (chanelList[j].data.length == 0)
+            for (var j = 0; j < channelList.length; j++){
+                if (channelList[j].data.length == 0)
                     continue;
-                var name = "串口:" + dataList[i].name + ' 通道:' + chanelList[j].chanel;
+                var name = "串口" + portName + ':' + channelList[j].channel;
                 var markpoint = [];
-                var last = chanelList[j].data;
+                var last = channelList[j].data;
                 last = last[last.length - 1].value;
                 markpoint.push({
                     yAxis: last[1],
                     xAxis: last[0],
                     value: last[1]
                 });
-                data.push({
-                    data: chanelList[j].data,
+                chartData.push({
+                    data: channelList[j].data,
                     name: name,
                     type: 'line',
                     showSymbol: false,
@@ -105,11 +99,11 @@
                 legend.push(name);
             }
         }
-        return {data:data, legend:legend, min: min, max: max};
+        return {data:chartData, legend:legend, min: min, max: max};
     }
 
     function updateChart(dataList, ymin=null, ymax=null){
-        var option = getDataOption(chart, dataList);
+        var option = getDataOption(dataList);
         var max = Math.ceil(option.max + (option.max - option.min) * 0.2);
         var min = Math.floor(option.min - (option.max - option.min) * 0.1);
         if (ymin != null)
@@ -149,15 +143,12 @@
         chart.setOption(option);
     }
 
-    function drawChart(title){
+    function drawChart(){
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('main'));
 
         // 指定图表的配置项和数据
         option = {
-            title: {
-                text: title
-            },
             tooltip: {
                 trigger: 'axis',
                 axisPointer: {
@@ -199,18 +190,20 @@
         return myChart;
     }
 
+    function initChart(title, legendList){
+        chart.setOption({
+            title: {
+                text: title
+            },
+            legend: {
+                data: legendList
+            },
+        });
+    }
+
     var chart;
     $(document).ready(function(){
-        var dataNum = parseInt(window.location.hash.substring(1, 2)) - 1;
-        var title = ['T', 'V1', 'V2', 'V3']
-        chart = drawChart(title[dataNum]);
-        var param = window.location.hash.substr(3);
-        param = decodeURIComponent(param);
-        param = param.substring("data=".length);
-        if (param.length > 0){
-            var dataList = JSON.parse(param);
-            updateChart(dataList);
-        }
+        chart = drawChart();
     });
     </script>
 </head>
