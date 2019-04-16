@@ -227,14 +227,16 @@
                 if (dataList[i].name != portName)
                     continue;
                 for (var j = 0; j < dataList[i].data.length; j++){
+                    var valueName = dataList[i].data[j].name;
                     var data = dataList[i].data[j];
-                    var chanel = data.chanel;
-                    var date = data.data[0].value[0];
-                    // 转存数据格式：1_1 T1 V1 VR RH1
-                    result += chanel + "  " + data.data[0].value[1] + "  " + data.data[1].value[1] + "  " 
-                            + data.data[2].value[1] + "  " + data.data[3].value[1] + "  " + data.RH + "  "
-                            + "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " 
-                            + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]" + "\r\n";
+                    if (data.data.length == 0)
+                        continue;
+                    for (var k = 0; k < data.data.length; k++){
+                        var date = data.data[k].value[0];
+                        result += portName + " " + valueName + ":" + data.data[k].value[1]
+                                + "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " 
+                                + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]" + "\r\n";
+                    }
                 }
             }
             return result;

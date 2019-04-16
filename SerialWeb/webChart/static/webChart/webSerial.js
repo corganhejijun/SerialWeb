@@ -133,7 +133,7 @@ SerialData.prototype.serialProcess = function(msg){
                     var time = data.data[0].value[0];
                     var time2 = data.data[data.data.length - 1].value[0];
                     if (time2.getTime() - time.getTime() > 30 * 60 * 1000){ 
-                        this.dataList[j].data.shift();
+                        data.data.shift();
                     }
                 }
             }
