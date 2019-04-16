@@ -1,0 +1,22 @@
+div.top {
+    position: absolute;
+    left: 30px;
+    top: 10px;
+    height: 60px;
+    padding-left: 30px;
+    padding-top: 10px;
+}
+html, body, iframe{
+    height: 100%;
+    width: 100%;
+}
+div.process {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+button.btn-look-data {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+}
