@@ -243,10 +243,24 @@
             applyFilter($("iframe[id^='data']"));
         });
         $("button.btn-look-data").click(function(){
+            /*
             var number = $(this)[0].parentNode.className.substring(4);
             var title = ['T', 'V1', 'V2', 'V3'];
             var data = JSON.stringify(dataList);
             window.open("http://" + window.location.host + "/chart#" + number + "?data=" + data, title[parseInt(number)]);
+            */
+        });
+        $("#clear-chart").click(function(){
+            for (var i = 0; i < dataList.length; i++){
+                for (var j = 0; j < dataList[i].data.length; j++){
+                    dataList[i].data[j].data = [];
+                }
+            }
+            document.getElementById("data1").contentWindow.redrawChart();
+            document.getElementById("data2").contentWindow.redrawChart();
+            document.getElementById("data3").contentWindow.redrawChart();
+            document.getElementById("data4").contentWindow.redrawChart();
+            $("#myModalData")[0].innerHTML = "";
         });
     });
     </script>
@@ -259,6 +273,7 @@
             {% endfor %} {% endfor %}
         </div>
         <div class="col-md-6 form-inline">
+            <button class="btn btn-default" id="clear-chart">清空数据</button>
             <div class="form-group">
                 <!--
                 <label for="checkbox-filter"> 过滤 </label>
@@ -272,7 +287,7 @@
                 <button class="download btn btn-primary">下载数据</button>
             </div>
             <div class="form-group">
-                <label for="baudrate"> 波特率 </label>
+                <label for="baudrate">波特率</label>
                 <input type="input" value="9600" id="baudrate" class="form-control">
             </div>
         </div>

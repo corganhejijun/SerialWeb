@@ -190,6 +190,16 @@
         return myChart;
     }
 
+    function redrawChart(){
+        var legendList = chart.getOption().legend[0].data;
+        var title = chart.getOption().title;
+        chart.clear();
+        chart.dispose();
+        chart = null;
+        chart = drawChart();
+        initChart(title[0].text, legendList);
+    }
+
     function initChart(title, legendList){
         chart.setOption({
             title: {

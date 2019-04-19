@@ -20,7 +20,6 @@
         z-index: 999;
     }
     div.data1 {
-        height: 89%;
         width: 100%;
     }
     </style>
@@ -121,10 +120,19 @@
             applyFilter($("iframe[id^='data']"));
         });
         $("button.btn-look-data").click(function(){
+            /*
             var number = $(this)[0].parentNode.className.substring(4);
             var title = ['T', 'V1', 'V2', 'V3'];
             var data = JSON.stringify(dataList);
             window.open("http://" + window.location.host + "/chart#" + number + "?data=" + data, title[parseInt(number)]);
+            */
+        });
+        $("#clear-chart").click(function(){
+            for (var i = 0; i < dataList.length; i++){
+                dataList[i].data[0].data = [];
+            }
+            document.getElementById("data1").contentWindow.updateChart([], 0, 1);
+            $("#myModalData")[0].innerHTML = "";
         });
     });
     </script>
@@ -137,6 +145,7 @@
             {% endfor %} {% endfor %} 
         </div>
         <div class="col-md-6 form-inline">
+            <button class="btn btn-default" id="clear-chart">清空数据</button>
             <div class="form-group">
                 <!---
                 <label>过滤</label>
@@ -150,10 +159,8 @@
                 <button class="download btn btn-primary">下载数据</button>
             </div>
             <div class="form-group">
-                <label>
-                    波特率
-                    <input type="input" value="256000" id="baudrate">
-                </label>
+                <label for="baudrate">波特率</label>
+                <input type="input" value="256000" id="baudrate" class="form-control">
             </div>
         </div>
         <div class="process" class="col-md-2">
