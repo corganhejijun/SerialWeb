@@ -12,14 +12,6 @@
     <script src="{% static 'webChart/echarts.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'webChart/webSerial.js' %}"></script>
     <style type="text/css">
-    div.chart {
-        position: absolute;
-        left: 10px;
-        right: 10px;
-        bottom: 30px;
-        top: 60px;
-        width: 90%;
-    }
     div.y-range {
         position: absolute;
         top: 30%;
@@ -28,8 +20,7 @@
         z-index: 999;
     }
     div.data1 {
-        position: absolute;
-        height: 100%;
+        height: 89%;
         width: 100%;
     }
     </style>
@@ -63,6 +54,11 @@
             var date = new Date(result[2]);
             var T1 = parseFloat(result[1]);
             dataList[portIndex].data[0].data.push({name: date.toString(), value: [date, parseFloat(T1)]});
+            if ($('#myModal').hasClass('in')){
+                $("#myModalData")[0].innerHTML += dataList[portIndex].name + " T1:" + T1
+                    + "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " 
+                    + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]" + "\r\n";
+            }
         }
         
         function updateChart(){
@@ -134,40 +130,44 @@
     </script>
 </head>
 <body>
-    <div class="top">
-        {% for item in list %} {% for port, open in item.items %}
-        <button class="com btn btn-success" value="{{port}}">打开{{port}}</button>
-        {% endfor %} {% endfor %} 
-        {% for item in list %} {% for port, open in item.items %}
-        <button class="download btn btn-primary" value="{{port}}">下载{{port}}数据</button>
-        {% endfor %} {% endfor %}
-        <label>
-            <input type="checkbox" value="" id="checkbox-filter">
-            过滤 
-        </label>
-        <select id="filter-select">
-        {% for item in list %} {% for port, open in item.items %}
-            <option>{{port}}</option>
-        {% endfor %} {% endfor %}
-        </select>
-        <label>
-            波特率
-            <input type="input" value="256000" id="baudrate">
-        </label>
+    <div class="top" class="row">
+        <div class="col-md-4">
+            {% for item in list %} {% for port, open in item.items %}
+            <button class="com btn btn-success" value="{{port}}">打开{{port}}</button>
+            {% endfor %} {% endfor %} 
+        </div>
+        <div class="col-md-6 form-inline">
+            <div class="form-group">
+                <!---
+                <label>过滤</label>
+                <input type="checkbox" value="" id="checkbox-filter">
+                -->
+                <select id="filter-select" class="form-control">
+                {% for item in list %} {% for port, open in item.items %}
+                    <option>{{port}}</option>
+                {% endfor %} {% endfor %}
+                </select>
+                <button class="download btn btn-primary">下载数据</button>
+            </div>
+            <div class="form-group">
+                <label>
+                    波特率
+                    <input type="input" value="256000" id="baudrate">
+                </label>
+            </div>
+        </div>
+        <div class="process" class="col-md-2">
+            <a href="/" class="data-process btn btn-success">返回首页</a>
+        </div>
     </div>
     <div class="y-range">
         <input class="form-control" placeholder="max value" id="yMax" style="font-size:20px">
         <p></p>
         <input class="form-control" placeholder="min value" id="yMin" style="font-size: 20px">
     </div>
-    <div class="process">
-        <a href="/" class="data-process btn btn-success">返回首页</a>
-    </div>
     <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-    <div class="chart" id="main">
-        <div class="data1">
-            <iframe src="/chart#1" id="data1"></iframe>
-        </div>
+    <div class="data1">
+        <iframe src="/chart#1" id="data1"></iframe>
     </div>
     <mymodal></mymodal>
     <script type="text/javascript">
