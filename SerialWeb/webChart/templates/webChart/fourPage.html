@@ -12,39 +12,30 @@
     <script src="{% static 'webChart/echarts.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'webChart/webSerial.js' %}"></script>
     <style type="text/css">
-    div.chart {
-        position: absolute;
-        left: 10px;
-        right: 10px;
-        bottom: 30px;
-        top: 60px;
-        width: 90%;
-    }
     div.data1 {
         position: absolute;
-        height: 50%;
+        height: 47%;
         width: 50%;
     }
     div.data2 {
         position: absolute;
-        height: 50%;
+        height: 47%;
         width: 50%;
         left: 50%;
-        top: 0;
     }
     div.data3 {
         position: absolute;
-        height: 50%;
+        height: 47%;
         width: 50%;
-        top: 50%;
+        top: 52%;
         left: 0;
     }
     div.data4 {
         position: absolute;
-        height: 50%;
+        height: 47%;
         width: 50%;
         left: 50%;
-        top: 50%;
+        top: 52%;
     }
     </style>
     <script type="text/javascript">
@@ -261,51 +252,51 @@
     </script>
 </head>
 <body>
-    <div class="top">
-        {% for item in list %} {% for port, open in item.items %}
-        <button class="com btn btn-success" value="{{port}}">打开{{port}}</button>
-        {% endfor %} {% endfor %} 
-        {% for item in list %} {% for port, open in item.items %}
-        <button class="download btn btn-primary" value="{{port}}">下载{{port}}数据</button>
-        {% endfor %} {% endfor %}
-        <label>
-            <input type="checkbox" value="" id="checkbox-filter">
-            过滤 
-        </label>
-        <select id="filter-select">
-        {% for item in list %} {% for port, open in item.items %}
-            <option>{{port}}</option>
-        {% endfor %} {% endfor %}
-        </select>
-        <label>
-            波特率
-            <input type="input" value="9600" id="baudrate">
-        </label>
-    </div>
-    <div class="filter">
-    </div>
-    <div class="process">
-        <button class="data-process btn btn-primary">数据处理</button>
-        <a href="/" class="data-process btn btn-success">返回首页</a>
+    <div class="top" class="row">
+        <div class="col-md-4">
+            {% for item in list %} {% for port, open in item.items %}
+            <button class="com btn btn-success" value="{{port}}">打开{{port}}</button>
+            {% endfor %} {% endfor %}
+        </div>
+        <div class="col-md-6 form-inline">
+            <div class="form-group">
+                <!--
+                <label for="checkbox-filter"> 过滤 </label>
+                <input type="checkbox" value="" id="checkbox-filter">
+                -->
+                <select id="filter-select" class="form-control">
+                {% for item in list %} {% for port, open in item.items %}
+                    <option>{{port}}</option>
+                {% endfor %} {% endfor %}
+                </select>
+                <button class="download btn btn-primary">下载数据</button>
+            </div>
+            <div class="form-group">
+                <label for="baudrate"> 波特率 </label>
+                <input type="input" value="9600" id="baudrate" class="form-control">
+            </div>
+        </div>
+        <div class="process" class="col-md-2">
+                <button class="data-process btn btn-primary">数据处理</button>
+                <a href="/" class="data-process btn btn-success">返回首页</a>
+        </div>
     </div>
     <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-    <div class="chart" id="main">
-        <div class="data1">
-            <iframe src="/chart#1" id="data1"></iframe>
-            <button class="btn btn-success btn-look-data">查看大图</button>
-        </div>
-        <div class="data2">
-            <iframe src="/chart#2" id="data2"></iframe>
-            <button class="btn btn-success btn-look-data">查看大图</button>
-        </div>
-        <div class="data3">
-            <iframe src="/chart#3" id="data3"></iframe>
-            <button class="btn btn-success btn-look-data">查看大图</button>
-        </div>
-        <div class="data4">
-            <iframe src="/chart#4" id="data4"></iframe>
-            <button class="btn btn-success btn-look-data">查看大图</button>
-        </div>
+    <div class="data1">
+        <iframe src="/chart#1" id="data1"></iframe>
+        <button class="btn btn-success btn-look-data">查看大图</button>
+    </div>
+    <div class="data2">
+        <iframe src="/chart#2" id="data2"></iframe>
+        <button class="btn btn-success btn-look-data">查看大图</button>
+    </div>
+    <div class="data3">
+        <iframe src="/chart#3" id="data3"></iframe>
+        <button class="btn btn-success btn-look-data">查看大图</button>
+    </div>
+    <div class="data4">
+        <iframe src="/chart#4" id="data4"></iframe>
+        <button class="btn btn-success btn-look-data">查看大图</button>
     </div>
     <mymodal></mymodal>
     <script type="text/javascript">

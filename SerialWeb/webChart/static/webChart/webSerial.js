@@ -77,7 +77,7 @@ function checkPortList(serialData, downloadFormat){
                 return;
             setPortButton(result, serialData);
             $("button.download").on('click', function(){
-                getDataDown($(this)[0], downloadFormat);
+                getDataDown($("#filter-select")[0], downloadFormat);
                 $('#myModal').modal();
             });
         }
