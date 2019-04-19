@@ -3,7 +3,6 @@ import threading
 from . import serialConstant as const
 import datetime
 import os
-import binascii
 
 class Port:
     def __init__(self, port):

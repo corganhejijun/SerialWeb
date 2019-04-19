@@ -205,10 +205,13 @@
         var serialData = new SerialData(updateChart, onGetData, dataList);
 
         $("button.data-process").click(function(){
+            /*
             $("#myModalLabel")[0].innerHTML = "数据处理";
             $("#processButton").show();
             $("#div-checkbox").show();
             $("#myModal").modal();
+            */
+           
         });
         setChartTitle(function(){
             serialData.getSerialData();

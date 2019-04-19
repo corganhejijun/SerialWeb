@@ -30,6 +30,9 @@ def fourPage(request):
 def chart(request):
     return render(request, 'webChart/chart.html')
 
+def datadown(request):
+    return render(request, 'webChart/datadown.html')
+
 def jsonData(request):
     func = request.GET['func']
     if func == "open":
@@ -49,4 +52,7 @@ def jsonData(request):
     elif func == "checkOpen":
         result = serialPort.getOpenList()
         return JsonResponse({'flag':True, 'openList':result['open'], 'occupy':result['occupy']})
+    elif func == "data":
+        result = serialPort.dataDown(request.GET['time'], float(request.GET['count']))
+        return JsonResponse({'flag': True, 'result': result})
     return JsonResponse({'flag':False})

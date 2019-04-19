@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>串口数据保存</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'webChart/bootstrap.min.css' %}" /> 
+    <script type="text/javascript" src="{% static 'webChart/jquery-2.2.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'webChart/bootstrap.min.js' %}"></script>
+    <style type="text/css">
+    </style>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $("#download").click(function(){
+            $.ajax({url: 'http://' + window.location.host + "/json",
+                data: {func: "data", time: "", count: $("#count").val()},
+                async : false,
+                success: function(result){
+                    var txt = "";
+                    if (result.flag == false)
+                        txt = "下载失败";
+                    else
+                        txt = "下载最近的" + $("#count").val() + "条记录成功, 存储路径:<p>" + result.result;
+                    $("#result").html(txt);
+                }
+            });
+        });
+    });
+    </script>
+</head>
+<body>
+    <div class='form-inline'>
+        <label for="time">下载最新的记录条数</label>
+        <input type="input" value="100" class="form-control" id="count">
+    </div>
+    <button class="btn btn-success" id="download">下载</button>
+    <h1 id="result"></h1>
+</body>
+</html>
