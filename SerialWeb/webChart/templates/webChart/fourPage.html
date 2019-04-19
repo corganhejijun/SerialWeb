@@ -113,17 +113,19 @@
             var date = new Date(result[3]);
             var chanel = result[1];
             var valueList = result[2].split(',');
-
+            var valueName = [];
             if (chanel == '1_1'){
                 dataList[portIndex].data[VALUE_NAME.V11].data.push({name: date.toString(), value: [date, parseFloat(valueList[0])]});
                 dataList[portIndex].data[VALUE_NAME.V12].data.push({name: date.toString(), value: [date, parseFloat(valueList[1])]});
                 dataList[portIndex].data[VALUE_NAME.V13].data.push({name: date.toString(), value: [date, parseFloat(valueList[2])]});
                 dataList[portIndex].data[VALUE_NAME.V1].data.push({name: date.toString(), value: [date, parseFloat(valueList[3])]});
+                valueName = [VALUE_NAME.V11, VALUE_NAME.V12, VALUE_NAME.V13, VALUE_NAME.V1];
             } else if (chanel == '2_1'){
                 dataList[portIndex].data[VALUE_NAME.V21].data.push({name: date.toString(), value: [date, parseFloat(valueList[0])]});
                 dataList[portIndex].data[VALUE_NAME.V22].data.push({name: date.toString(), value: [date, parseFloat(valueList[1])]});
                 dataList[portIndex].data[VALUE_NAME.V23].data.push({name: date.toString(), value: [date, parseFloat(valueList[2])]});
                 dataList[portIndex].data[VALUE_NAME.V2].data.push({name: date.toString(), value: [date, parseFloat(valueList[3])]});
+                valueName = [VALUE_NAME.V21, VALUE_NAME.V22, VALUE_NAME.V23, VALUE_NAME.V2];
             } else if (chanel == '1_2'){
                 dataList[portIndex].data[VALUE_NAME.T1].data.push({name: date.toString(), value: [date, parseFloat(valueList[0])]});
                 dataList[portIndex].data[VALUE_NAME.RH1].data.push({name: date.toString(), value: [date, parseFloat(valueList[1])]});
@@ -131,6 +133,7 @@
                 dataList[portIndex].data[VALUE_NAME.RH2].data.push({name: date.toString(), value: [date, parseFloat(valueList[3])]});
                 dataList[portIndex].data[VALUE_NAME.T3].data.push({name: date.toString(), value: [date, parseFloat(valueList[4])]});
                 dataList[portIndex].data[VALUE_NAME.RH3].data.push({name: date.toString(), value: [date, parseFloat(valueList[5])]});
+                valueName = [VALUE_NAME.T1, VALUE_NAME.RH1, VALUE_NAME.T2, VALUE_NAME.RH2, VALUE_NAME.T3, VALUE_NAME.RH3];
             } else if (chanel == '2_2'){
                 dataList[portIndex].data[VALUE_NAME.T4].data.push({name: date.toString(), value: [date, parseFloat(valueList[0])]});
                 dataList[portIndex].data[VALUE_NAME.RH4].data.push({name: date.toString(), value: [date, parseFloat(valueList[1])]});
@@ -138,6 +141,17 @@
                 dataList[portIndex].data[VALUE_NAME.RH5].data.push({name: date.toString(), value: [date, parseFloat(valueList[3])]});
                 dataList[portIndex].data[VALUE_NAME.T6].data.push({name: date.toString(), value: [date, parseFloat(valueList[4])]});
                 dataList[portIndex].data[VALUE_NAME.RH6].data.push({name: date.toString(), value: [date, parseFloat(valueList[5])]});
+                valueName = [VALUE_NAME.T4, VALUE_NAME.RH4, VALUE_NAME.T5, VALUE_NAME.RH5, VALUE_NAME.T6, VALUE_NAME.RH6];
+            }
+            if ($('#myModal').hasClass('in')){
+                var portName = dataList[portIndex].name;
+                var result = "";
+                for (var i = 0; i < valueList.length; i++){
+                        result += portName + " " + valueName[i] + ":" + valueList[i]
+                                + "[" + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " " 
+                                + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]" + "\r\n";
+                }
+                $("#myModalData")[0].innerHTML += result;
             }
         }
 
@@ -150,6 +164,9 @@
             if (dataList.length == 0)
                 return;
             var data1List = [];
+            var data2List = [];
+            var data4List = [];
+            var data3List = [];
             for (var i = 0; i < dataList.length; i++){
                 if (dataList[i].opened == false)
                     continue;
@@ -167,12 +184,6 @@
                 data.push({name:'RH5', data:dataList[i].data[VALUE_NAME.RH5]});
                 data.push({name:'RH6', data:dataList[i].data[VALUE_NAME.RH6]});
                 data1List.push({name:dataList[i].name, data:data});
-            }
-            document.getElementById("data1").contentWindow.updateChart(data1List);
-            var data2List = [];
-            for (var i = 0; i < dataList.length; i++){
-                if (dataList[i].opened == false)
-                    continue;
                 var data = [];
                 data.push({name:'V11', data:dataList[i].data[VALUE_NAME.V11]});
                 data.push({name:'V12', data:dataList[i].data[VALUE_NAME.V12]});
@@ -181,23 +192,11 @@
                 data.push({name:'V22', data:dataList[i].data[VALUE_NAME.V22]});
                 data.push({name:'V23', data:dataList[i].data[VALUE_NAME.V23]});
                 data2List.push({name:dataList[i].name, data:data});
-            }
-            document.getElementById("data2").contentWindow.updateChart(data2List);
-            var data3List = [];
-            for (var i = 0; i < dataList.length; i++){
-                if (dataList[i].opened == false)
-                    continue;
-                var data = [];
+                data = [];
                 data.push({name:'V1', data:dataList[i].data[VALUE_NAME.V1]});
                 data.push({name:'V2', data:dataList[i].data[VALUE_NAME.V2]});
                 data3List.push({name:dataList[i].name, data:data});
-            }
-            document.getElementById("data3").contentWindow.updateChart(data3List);
-            var data4List = [];
-            for (var i = 0; i < dataList.length; i++){
-                if (dataList[i].opened == false)
-                    continue;
-                var data = [];
+                data = [];
                 data.push({name:"V11'", data:dataList[i].data[VALUE_NAME.V11p]});
                 data.push({name:"V12'", data:dataList[i].data[VALUE_NAME.V12p]});
                 data.push({name:"V13'", data:dataList[i].data[VALUE_NAME.V13p]});
@@ -206,6 +205,9 @@
                 data.push({name:"V23'", data:dataList[i].data[VALUE_NAME.V23p]});
                 data4List.push({name:dataList[i].name, data:data});
             }
+            document.getElementById("data1").contentWindow.updateChart(data1List);
+            document.getElementById("data2").contentWindow.updateChart(data2List);
+            document.getElementById("data3").contentWindow.updateChart(data3List);
             document.getElementById("data4").contentWindow.updateChart(data4List);
         }
 

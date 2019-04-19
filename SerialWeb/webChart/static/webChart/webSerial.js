@@ -129,13 +129,13 @@ SerialData.prototype.serialProcess = function(msg){
             for (var x = 0; x < allDataList.length; x++){
                 this.getData(allDataList[x], j);
                 for (var k = 0; k < this.dataList[j].data.length; k++){
-                    // 最多存储30分钟数据
                     var data = this.dataList[j].data[k];
-                    if (data.length < 100 || data.data.length == 0)
+                    if (data.data.length < 100)
                         continue;
+                    // 最多存储15分钟数据
                     var time = data.data[0].value[0];
                     var time2 = data.data[data.data.length - 1].value[0];
-                    if (time2.getTime() - time.getTime() > 30 * 60 * 1000){ 
+                    if (time2.getTime() - time.getTime() > 15 * 60 * 1000){ 
                         data.data.shift();
                     }
                 }
