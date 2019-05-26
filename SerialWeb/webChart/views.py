@@ -1,7 +1,8 @@
 # -*- coding: UTF-8 -*-
 from django.shortcuts import render
 from django.http import JsonResponse
-from .getSerial import SerialPort
+# from .getSerial import SerialPort
+from .formSerial import SerialPort
 import json
 
 serialPort = SerialPort()
