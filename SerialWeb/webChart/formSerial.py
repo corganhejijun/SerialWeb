@@ -48,7 +48,12 @@ class SerialPort:
         print("close port " + name + " result " + recv['data']['data'])
 
     def read_data(self, nameList):
-        pass
+        data = "get:data"
+        url = "http://127.0.0.1:8880/"
+        r = requests.post(url, data=data)
+        recv = r.text
+        print("receive data: " + recv)
+        return recv
 
     def getOpenList(self):
         data = "get:openList"

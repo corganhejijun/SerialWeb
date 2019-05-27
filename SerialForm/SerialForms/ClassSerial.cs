@@ -7,6 +7,7 @@ namespace SerialForms
     {
         SerialPort[] portList;
         ArrayList openedList;
+        static ArrayList recvData = new ArrayList();
         public ClassSerial()
         {
             string[] portNames = SerialPort.GetPortNames();
@@ -32,6 +33,22 @@ namespace SerialForms
             }
         }
 
+        bool ifOccupy(SerialPort port)
+        {
+            bool occupy = false;
+            try
+            {
+                port.BaudRate = 9600;
+                port.Open();
+                port.Close();
+            }
+            catch
+            {
+                occupy = true;
+            }
+            return occupy;
+        }
+
         public string getPortStatus(string name)
         {
             string result = "{";
@@ -48,7 +65,7 @@ namespace SerialForms
             {
                 if (openedList.Contains(port))
                     continue;
-                if (port.IsOpen)
+                if (port.PortName == name && ifOccupy(port))
                     occupy = "\"occupy\":true";
             }
             result += opened + ',' + occupy;
@@ -70,18 +87,7 @@ namespace SerialForms
             {
                 if (openedList.Contains(port))
                     continue;
-                bool canOpen = true;
-                try
-                {
-                    port.BaudRate = 9600;
-                    port.Open();
-                    port.Close();
-                }
-                catch
-                {
-                    canOpen = false;
-                }
-                if (!canOpen)
+                if (ifOccupy(port))
                     occupy += "\"" + port.PortName + "\",";
             }
             if (occupy.Length > 0)
@@ -115,12 +121,6 @@ namespace SerialForms
             return "{\"data\": \"not found port " + name + " open error\"}";
         }
 
-        private static void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
-        {
-            SerialPort sp = (SerialPort)sender;
-            string indata = sp.ReadExisting();
-        }
-
         public string closePort(string name)
         {
             foreach (SerialPort port in openedList)
@@ -140,6 +140,29 @@ namespace SerialForms
             foreach(SerialPort port in openedList)
                 port.Close();
             openedList.Clear();
+        }
+
+        private static void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+        {
+            SerialPort sp = (SerialPort)sender;
+            string indata = sp.ReadExisting();
+            if (indata.Length > 0)
+                recvData.Add(sp.PortName + ":" + indata);
+        }
+
+        public static string receiveData(out bool hasRemaining)
+        {
+            hasRemaining = true;
+            if (recvData.Count == 0)
+            {
+                hasRemaining = false;
+                return "";
+            }
+            string result = (string)recvData[0];
+            recvData.RemoveAt(0);
+            if (recvData.Count == 0)
+                hasRemaining = false;
+            return result;
         }
     }
 }

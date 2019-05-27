@@ -31,9 +31,9 @@ function setPortButton(result, serialData){
         }
     }
     for (var i = 0; i < result.occupy.length; i++){
-        $(".top")[0].innerHTML += "<button class='btn btn-default' disabled=true>" + result.occupy[i] + "被占用</button>"
+        $(".port-button")[0].innerHTML += "<button class='btn btn-default' disabled=true>" + result.occupy[i] + "被占用</button>"
     }
-    buttonList.on('click', function(){
+    $("button.com").on('click', function(){
         var btn = $(this);
         if (btn.hasClass('btn-success')){
             $.ajax({url: 'http://' + window.location.host + "/json",

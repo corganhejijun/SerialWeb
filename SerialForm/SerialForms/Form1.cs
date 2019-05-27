@@ -56,6 +56,20 @@ namespace SerialForms
                     this.BeginInvoke(new ClassWeb.OnGetPost(updateLogText), new object[] { result });
                     return result;
                 }
+                else if (getName == "data")
+                {
+                    bool hasRemain = true;
+                    string data = "";
+                    while (hasRemain)
+                    {
+                        string result = ClassSerial.receiveData(out hasRemain);
+                        if (result.Length > 0)
+                            data += result + "\r\n";
+                    }
+                    if (data.Length > 0)
+                        this.BeginInvoke(new ClassWeb.OnGetPost(updateLogText), new object[] { data });
+                    return "{\"data\": \"" + data + "\"}";
+                }
             }
             return "";
         }

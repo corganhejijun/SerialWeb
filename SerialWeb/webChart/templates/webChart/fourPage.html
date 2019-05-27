@@ -270,7 +270,7 @@
 </head>
 <body>
     <div class="top" class="row">
-        <div class="col-md-4">
+        <div class="col-md-4 port-button">
             {% for item in list %} {% for port, open in item.items %}
             <button class="com btn btn-success" value="{{port}}">打开{{port}}</button>
             {% endfor %} {% endfor %}
