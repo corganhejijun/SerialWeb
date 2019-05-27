@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 # from .getSerial import SerialPort
 from .formSerial import SerialPort
+from . import serialConstant as const
 import json
 
 serialPort = SerialPort()
@@ -54,6 +55,6 @@ def jsonData(request):
         result = serialPort.getOpenList()
         return JsonResponse({'flag':True, 'openList':result['open'], 'occupy':result['occupy']})
     elif func == "data":
-        result = serialPort.dataDown(request.GET['time'], float(request.GET['count']))
+        result = const.dataDown(request.GET['time'], float(request.GET['count']))
         return JsonResponse({'flag': True, 'result': result})
     return JsonResponse({'flag':False})

@@ -3,4 +3,5 @@
 /SerialWeb/webChart/migrations/0*
 _*.txt
 Debug
+Release
 .vs

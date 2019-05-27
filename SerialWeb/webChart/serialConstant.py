@@ -45,6 +45,49 @@ def processLine(line):
     portData = models.PortData(name=channelName, time=time, strValue=dataStr)
     portData.save()
     return data, channelName
+    
+
+def dataDown(self, time, count):
+    portData = models.PortData.objects.all().order_by('-id')[:count]
+    result = []
+    for data in portData:
+        result.append({'name': data.name, 'value': data.strValue, 'time': data.time})
+    filePath = os.path.join(ROOT_PATH, "_" + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".txt")
+    with open(filePath, 'w') as file:
+        file.write('T1,T2,T3,T4,T5,T6,RH1,RH2,RH3,RH4,RH5,RH6,V11,V12,V13,V21,V22,V23,V1,V2,V11,V12,date\r\n')
+        for item in reversed(result):
+            if item['name'] ==  '1_1':
+                try:
+                    value = item['value'].split(',')
+                    line = ',,,,,,,,,,,,' + value[0] + ',' + value[1] + ',' + value[2] + ',,,,' + value[3] + ',,,,' + item['time']
+                    file.write(line + '\r\n')
+                except:
+                    pass
+            if item['name'] == '2_1':
+                try:
+                    value = item['value'].split(',')
+                    line = ',,,,,,,,,,,,,,,' + value[0] + ',' + value[1] + ',' + value[2] + ',,' + value[3] + ',,,' + item['time']
+                    file.write(line + '\r\n')
+                except:
+                    pass
+            if item['name'] == '1_2':
+                try:
+                    value = item['value'].split(',')
+                    line = (value[0] + ',' + value[2] + ',' + value[4] + ',,,,' 
+                        + value[1] + ',' + value[3] + ',' + value[5] + ',,,,,,,,,,,,,,' + item['time'])
+                    file.write(line + '\r\n')
+                except:
+                    pass
+            if item['name'] == '2_2':
+                try:
+                    value = item['value'].split(',')
+                    line = (',,,' + value[0] + ',' + value[2] + ',' + value[4] + ',,,,' 
+                        + value[1] + ',' + value[3] + ',' + value[5] + ',,,,,,,,,,,' + item['time'])
+                    file.write(line + '\r\n')
+                except:
+                    pass
+    return filePath
+
 
 ## deprecated
 #def hex2Double(s):

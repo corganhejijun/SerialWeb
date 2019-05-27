@@ -34,6 +34,7 @@
             this.buttonPortStatus = new System.Windows.Forms.Button();
             this.labelStatus = new System.Windows.Forms.Label();
             this.buttonBrowser = new System.Windows.Forms.Button();
+            this.buttonWebServerStart = new System.Windows.Forms.Button();
             this.SuspendLayout();
             //
             // comboBoxSerial
@@ -86,7 +87,7 @@
             //
             // buttonBrowser
             //
-            this.buttonBrowser.Location = new System.Drawing.Point(273, 10);
+            this.buttonBrowser.Location = new System.Drawing.Point(354, 9);
             this.buttonBrowser.Name = "buttonBrowser";
             this.buttonBrowser.Size = new System.Drawing.Size(88, 23);
             this.buttonBrowser.TabIndex = 5;
@@ -94,11 +95,22 @@
             this.buttonBrowser.UseVisualStyleBackColor = true;
             this.buttonBrowser.Click += new System.EventHandler(this.buttonBrowser_Click);
             //
+            // buttonWebServerStart
+            //
+            this.buttonWebServerStart.Location = new System.Drawing.Point(273, 10);
+            this.buttonWebServerStart.Name = "buttonWebServerStart";
+            this.buttonWebServerStart.Size = new System.Drawing.Size(75, 23);
+            this.buttonWebServerStart.TabIndex = 6;
+            this.buttonWebServerStart.Text = "启动服务";
+            this.buttonWebServerStart.UseVisualStyleBackColor = true;
+            this.buttonWebServerStart.Click += new System.EventHandler(this.buttonWebServerStart_Click);
+            //
             // Form1
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(759, 520);
+            this.Controls.Add(this.buttonWebServerStart);
             this.Controls.Add(this.buttonBrowser);
             this.Controls.Add(this.labelStatus);
             this.Controls.Add(this.buttonPortStatus);
@@ -108,6 +120,7 @@
             this.Name = "Form1";
             this.Text = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.Shown += new System.EventHandler(this.Form1_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -121,6 +134,7 @@
         private System.Windows.Forms.Button buttonPortStatus;
         private System.Windows.Forms.Label labelStatus;
         private System.Windows.Forms.Button buttonBrowser;
+        private System.Windows.Forms.Button buttonWebServerStart;
     }
 }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Windows.Forms;
 
@@ -83,6 +84,25 @@ namespace SerialForms
         {
             textBoxLog.Text = log + "\r\n" + textBoxLog.Text;
             return "";
+        }
+
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            startWebServer();
+        }
+
+        void startWebServer()
+        {
+            ProcessStartInfo start = new ProcessStartInfo();
+            start.FileName = Environment.CurrentDirectory + "\\startup.bat";
+            Process myPro = new Process();
+            myPro.StartInfo = start;
+            myPro.Start();
+        }
+
+        private void buttonWebServerStart_Click(object sender, EventArgs e)
+        {
+            startWebServer();
         }
     }
 }
