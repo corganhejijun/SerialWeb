@@ -2,6 +2,8 @@
 import requests
 import json
 from . import serialConstant as const
+import datetime
+from . import models
 
 class SerialPort:
     def __init__(self):
@@ -47,13 +49,34 @@ class SerialPort:
         recv = self.sendPost(data)
         print("close port " + name + " result " + recv['data']['data'])
 
+    def process_data(self, recv, namelist):
+        lines = recv.split('\r\n')
+        portName = ""
+        result = []
+        for line in lines:
+            if len(line) == 0:
+                continue
+            data = ''
+            if ":" in line:
+                [portName, data] = line.split(':', 1)
+            else:
+                data = line
+            if len(portName) > 0 and len(data) > 0:
+                time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                if portName in namelist:
+                    result.append(portName + ":" + data + '[' + time + ']')
+                # portData = models.PortData(name=portName, time=time, strValue=data)
+                # portData.save()
+                
+        return result
+
     def read_data(self, nameList):
         data = "get:data"
         url = "http://127.0.0.1:8880/"
         r = requests.post(url, data=data)
-        recv = r.text
+        recv = r.text[len('{"result":true, "data":{"data": "'):-len('"}}')]
         print("receive data: " + recv)
-        return recv
+        return self.process_data(recv, nameList)
 
     def getOpenList(self):
         data = "get:openList"

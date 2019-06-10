@@ -27,6 +27,7 @@ function setPortButton(result, serialData){
             if (button.value == result.openList[i]){
                 $(button).removeClass('btn-success').addClass('btn-danger');
                 button.innerHTML = "关闭" + button.value;
+                serialData.openPort(button.value);
             }
         }
     }

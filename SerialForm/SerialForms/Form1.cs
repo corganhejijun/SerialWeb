@@ -64,7 +64,7 @@ namespace SerialForms
                     while (hasRemain)
                     {
                         string result = ClassSerial.receiveData(out hasRemain);
-                        if (result.Length > 0)
+                        if (result != null && result.Length > 0)
                             data += result + "\r\n";
                     }
                     if (data.Length > 0)
