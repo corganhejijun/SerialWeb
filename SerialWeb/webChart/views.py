@@ -1,8 +1,8 @@
 # -*- coding: UTF-8 -*-
 from django.shortcuts import render
 from django.http import JsonResponse
-# from .getSerial import SerialPort
-from .formSerial import SerialPort
+from .getSerial import SerialPort
+# from .formSerial import SerialPort
 from . import serialConstant as const
 import json
 

@@ -26,15 +26,17 @@
         var chartData = [];
         var min = null;
         var max = null;
-        var channelList = [];
         var legend = [];
         for (var i = 0; i < dataList.length; i++){
             var portName = dataList[i].name;
+            var channelList = [];
             for (var j = 0; j < dataList[i].data.length; j++){
                 var valueName = dataList[i].data[j].name;
                 var valueData = dataList[i].data[j].data;
                 var channel = {channel: valueName, second: -1, average: 0, time:null, data:[]};
                 for (var k = 0; k < valueData.data.length; k++){
+                    if(isNaN(valueData.data[k].value[1]))
+                        continue;
                     if (channel.second == -1){
                         channel.time = valueData.data[k].value[0];
                         channel.second = valueData.data[k].value[0].getSeconds();
