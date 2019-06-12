@@ -68,7 +68,10 @@ class Port:
                 self.port.flushInput()
             if not n and (datetime.datetime.now() - lasttime).total_seconds() > 1:
                 if len(fileData) > 0:
-                    self.file.write(fileData + "\r\n")
+                    try:
+                        self.file.write(fileData + "\r\n")
+                    except:
+                        continue
                     fileData = ""
                 lasttime = datetime.datetime.now()
 
