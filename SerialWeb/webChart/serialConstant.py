@@ -47,12 +47,16 @@ def processLine(line):
     return data, channelName
     
 
-def dataDown(self, time, count):
+def dataDown(time, count):
     portData = models.PortData.objects.all().order_by('-id')[:count]
     result = []
     for data in portData:
         result.append({'name': data.name, 'value': data.strValue, 'time': data.time})
-    filePath = os.path.join(ROOT_PATH, "_" + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".txt")
+    fileName = "dataResult.csv"
+    filePathOld = os.path.join(ROOT_PATH, "_" + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".csv")
+    filePath = os.path.join(ROOT_PATH, fileName)
+    if os.path.exists(filePath):
+        os.rename(filePath, filePathOld)
     with open(filePath, 'w') as file:
         file.write('T1,T2,T3,T4,T5,T6,RH1,RH2,RH3,RH4,RH5,RH6,V11,V12,V13,V21,V22,V23,V1,V2,V11,V12,date\r\n')
         for item in reversed(result):
